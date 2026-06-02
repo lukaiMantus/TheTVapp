@@ -1,16 +1,90 @@
 [
   {
-    "id": "thetvapp_nasa_tv",
+    "id": "thetvapp_ae",
     "type": "tv",
-    "name": "NASA TV Public",
-    "poster": "https://www.nasa.gov/wp-content/themes/nasa/assets/images/nasa-logo.svg",
-    "url": "https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8"
+    "name": "A&E",
+    "poster": "https://thetvapp.to/img/channels/ae.png",
+    "url": "https://thetvapp.to/hls/ae/index.m3u8",
+    "genres": ["Live TV"]
   },
   {
-    "id": "thetvapp_hls_test",
+    "id": "thetvapp_acc-network",
     "type": "tv",
-    "name": "HLS Test Channel",
-    "poster": "https://dummyimage.com/512x768/1f2937/ffffff.png&text=HLS+Test",
-    "url": "https://ireplay.tv/test/blender.m3u8"
+    "name": "ACC Network",
+    "poster": "https://thetvapp.to/img/channels/acc-network.png",
+    "url": "https://thetvapp.to/hls/acc-network/index.m3u8",
+    "genres": ["Live TV"]
+  },
+  {
+    "id": "thetvapp_amc",
+    "type": "tv",
+    "name": "AMC",
+    "poster": "https://thetvapp.to/img/channels/amc.png",
+    "url": "https://thetvapp.to/hls/amc/index.m3u8",
+    "genres": ["Live TV"]
+  },
+  {
+    "id": "thetvapp_espn",
+    "type": "tv",
+    "name": "ESPN",
+    "poster": "https://thetvapp.to/img/channels/espn.png",
+    "url": "https://thetvapp.to/hls/espn/index.m3u8",
+    "genres": ["Live TV"]
+  },
+  {
+    "id": "thetvapp_espn2",
+    "type": "tv",
+    "name": "ESPN2",
+    "poster": "https://thetvapp.to/img/channels/espn2.png",
+    "url": "https://thetvapp.to/hls/espn2/index.m3u8",
+    "genres": ["Live TV"]
+  },
+  {
+    "id": "thetvapp_fox-news-channel",
+    "type": "tv",
+    "name": "FOX News Channel",
+    "poster": "https://thetvapp.to/img/channels/fox-news-channel.png",
+    "url": "https://thetvapp.to/hls/fox-news-channel/index.m3u8",
+    "genres": ["Live TV"]
+  },
+  {
+    "id": "thetvapp_cnn",
+    "type": "tv",
+    "name": "CNN",
+    "poster": "https://thetvapp.to/img/channels/cnn.png",
+    "url": "https://thetvapp.to/hls/cnn/index.m3u8",
+    "genres": ["Live TV"]
+  },
+  {
+    "id": "thetvapp_msnbc",
+    "type": "tv",
+    "name": "MSNBC",
+    "poster": "https://thetvapp.to/img/channels/msnbc.png",
+    "url": "https://thetvapp.to/hls/msnbc/index.m3u8",
+    "genres": ["Live TV"]
+  },
+  {
+    "id": "thetvapp_hbo-east",
+    "type": "tv",
+    "name": "HBO East",
+    "poster": "https://thetvapp.to/img/channels/hbo-east.png",
+    "url": "https://thetvapp.to/hls/hbo-east/index.m3u8",
+    "genres": ["Live TV"]
+  },
+  {
+    "id": "thetvapp_disney-channel-east",
+    "type": "tv",
+    "name": "Disney Channel (East)",
+    "poster": "https://thetvapp.to/img/channels/disney-channel-east.png",
+    "url": "https://thetvapp.to/hls/disney-channel-east/index.m3u8",
+    "genres": ["Live TV"]
+  },
+  {
+    "id": "thetvapp_cartoon-network",
+    "type": "tv",
+    "name": "Cartoon Network",
+    "poster": "https://thetvapp.to/img/channels/cartoon-network.png",
+    "url": "https://thetvapp.to/hls/cartoon-network/index.m3u8",
+    "genres": ["Live TV"]
   }
 ]
