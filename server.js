@@ -14,9 +14,9 @@ app.use(cors());
 // Manifest
 const manifest = {
   id: 'org.stremio.thetvapp',
-  version: '1.0.3',
-  name: 'TheTVApp',
-  description: 'Watch live TV channels with Proxy Relay',
+  version: '1.0.4',
+  name: 'TheTVApp (No-VPN)',
+  description: 'Watch live TV channels without a VPN (Smart Proxy)',
   resources: ['catalog', 'meta', 'stream'],
   types: ['tv'],
   catalogs: [{ type: 'tv', id: 'thetvapp_channels', name: 'Live TV Channels' }],
@@ -51,26 +51,24 @@ app.get('/stream/tv/:id.json', (req, res) => {
   const channel = getChannels().find(c => c.id === req.params.id);
   if (!channel || !channel.url) return res.json({ streams: [] });
   
-  // Create a proxy URL that points to our own server
   const protocol = req.secure ? 'https' : 'http';
   const host = req.get('host');
   const proxyUrl = `${protocol}://${host}/proxy/${channel.id}/index.m3u8`;
   
   res.json({
     streams: [{
-      name: 'Proxy Relay',
+      name: 'Smart Relay (No VPN)',
       title: channel.name,
       url: proxyUrl
     }]
   });
 });
 
-// PROXY RELAY: This bypasses the Referer protection
-app.get('/proxy/:id/:file', (req, res) => {
+// SMART PROXY: Rewrites the playlist so all segments go through the US server
+app.get('/proxy/:id/index.m3u8', (req, res) => {
   const channel = getChannels().find(c => c.id === req.params.id);
   if (!channel || !channel.url) return res.status(404).send('Not found');
 
-  const targetUrl = channel.url;
   const options = {
     headers: {
       'Referer': 'https://thetvapp.to/',
@@ -78,20 +76,31 @@ app.get('/proxy/:id/:file', (req, res) => {
     }
   };
 
-  https.get(targetUrl, options, (proxyRes) => {
-    res.writeHead(proxyRes.statusCode, proxyRes.headers);
-    proxyRes.pipe(res);
+  https.get(channel.url, options, (proxyRes) => {
+    let data = '';
+    proxyRes.on('data', (chunk) => { data += chunk; });
+    proxyRes.on('end', () => {
+      // Rewrite segment URLs to point back to our proxy
+      const protocol = req.secure ? 'https' : 'http';
+      const host = req.get('host');
+      const baseUrl = `${protocol}://${host}/proxy/${req.params.id}/`;
+      
+      // Replace segment names (e.g., segment1.ts) with full proxy URLs
+      const rewrittenData = data.replace(/([a-zA-Z0-9_-]+\.ts)/g, `${baseUrl}$1`);
+      
+      res.set('Content-Type', 'application/vnd.apple.mpegurl');
+      res.send(rewrittenData);
+    });
   }).on('error', (e) => {
     res.status(500).send(e.message);
   });
 });
 
-// Proxy for segments (.ts files)
+// Segment Proxy
 app.get('/proxy/:id/:segment.ts', (req, res) => {
   const channel = getChannels().find(c => c.id === req.params.id);
   if (!channel || !channel.url) return res.status(404).send('Not found');
 
-  // Construct the segment URL based on the master playlist URL
   const baseUrl = channel.url.substring(0, channel.url.lastIndexOf('/') + 1);
   const targetUrl = baseUrl + req.params.segment + '.ts';
 
@@ -110,4 +119,4 @@ app.get('/proxy/:id/:segment.ts', (req, res) => {
   });
 });
 
-app.listen(PORT, () => console.log(`Proxy Addon live on ${PORT}`));
+app.listen(PORT, () => console.log(`Smart Proxy live on ${PORT}`));
