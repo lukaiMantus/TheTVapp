@@ -14,7 +14,7 @@ app.use(cors());
 // Manifest
 const manifest = {
   id: 'org.stremio.thetvapp',
-  version: '1.0.4',
+  version: '1.0.5',
   name: 'TheTVApp (No-VPN)',
   description: 'Watch live TV channels without a VPN (Smart Proxy)',
   resources: ['catalog', 'meta', 'stream'],
@@ -51,9 +51,9 @@ app.get('/stream/tv/:id.json', (req, res) => {
   const channel = getChannels().find(c => c.id === req.params.id);
   if (!channel || !channel.url) return res.json({ streams: [] });
   
-  const protocol = req.secure ? 'https' : 'http';
+  // FORCE HTTPS for the proxy URL
   const host = req.get('host');
-  const proxyUrl = `${protocol}://${host}/proxy/${channel.id}/index.m3u8`;
+  const proxyUrl = `https://${host}/proxy/${channel.id}/index.m3u8`;
   
   res.json({
     streams: [{
@@ -80,12 +80,10 @@ app.get('/proxy/:id/index.m3u8', (req, res) => {
     let data = '';
     proxyRes.on('data', (chunk) => { data += chunk; });
     proxyRes.on('end', () => {
-      // Rewrite segment URLs to point back to our proxy
-      const protocol = req.secure ? 'https' : 'http';
+      // FORCE HTTPS for segment URLs
       const host = req.get('host');
-      const baseUrl = `${protocol}://${host}/proxy/${req.params.id}/`;
+      const baseUrl = `https://${host}/proxy/${req.params.id}/`;
       
-      // Replace segment names (e.g., segment1.ts) with full proxy URLs
       const rewrittenData = data.replace(/([a-zA-Z0-9_-]+\.ts)/g, `${baseUrl}$1`);
       
       res.set('Content-Type', 'application/vnd.apple.mpegurl');
