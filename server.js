@@ -1,48 +1,42 @@
 'use strict';
+
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 
 const app = express();
 const PORT = process.env.PORT || 7000;
 
 app.use(cors());
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.type('application/json');
-  next();
-});
 
-// This function looks for channels.json in the main folder
+// Manifest
+const manifest = {
+  id: 'org.stremio.thetvapp',
+  version: '1.0.3',
+  name: 'TheTVApp',
+  description: 'Watch live TV channels with Proxy Relay',
+  resources: ['catalog', 'meta', 'stream'],
+  types: ['tv'],
+  catalogs: [{ type: 'tv', id: 'thetvapp_channels', name: 'Live TV Channels' }],
+  idPrefixes: ['thetvapp_']
+};
+
 function getChannels() {
   try {
     const p = path.join(__dirname, 'channels.json');
     if (fs.existsSync(p)) {
       return JSON.parse(fs.readFileSync(p, 'utf8'));
     }
-  } catch (e) {
-    console.error("JSON Error:", e.message);
-  }
-  return []; // Returns empty list instead of crashing
+  } catch (e) {}
+  return [];
 }
 
-app.get('/manifest.json', (req, res) => {
-  res.json({
-    id: 'org.stremio.thetvapp',
-    version: '1.0.2',
-    name: 'TheTVApp',
-    description: 'Watch live TV channels',
-    resources: ['catalog', 'meta', 'stream'],
-    types: ['tv'],
-    catalogs: [{ type: 'tv', id: 'thetvapp_channels', name: 'Live TV Channels' }],
-    idPrefixes: ['thetvapp_']
-  });
-});
+app.get('/manifest.json', (req, res) => res.json(manifest));
 
 app.get('/catalog/tv/thetvapp_channels.json', (req, res) => {
-  const channels = getChannels();
-  const metas = channels.map(c => ({
+  const metas = getChannels().map(c => ({
     id: c.id, type: 'tv', name: c.name, poster: c.poster
   }));
   res.json({ metas });
@@ -55,7 +49,65 @@ app.get('/meta/tv/:id.json', (req, res) => {
 
 app.get('/stream/tv/:id.json', (req, res) => {
   const channel = getChannels().find(c => c.id === req.params.id);
-  res.json({ streams: channel && channel.url ? [{ name: channel.name, title: 'Live TV', url: channel.url }] : [] });
+  if (!channel || !channel.url) return res.json({ streams: [] });
+  
+  // Create a proxy URL that points to our own server
+  const protocol = req.secure ? 'https' : 'http';
+  const host = req.get('host');
+  const proxyUrl = `${protocol}://${host}/proxy/${channel.id}/index.m3u8`;
+  
+  res.json({
+    streams: [{
+      name: 'Proxy Relay',
+      title: channel.name,
+      url: proxyUrl
+    }]
+  });
 });
 
-app.listen(PORT, () => console.log(`Live on ${PORT}`));
+// PROXY RELAY: This bypasses the Referer protection
+app.get('/proxy/:id/:file', (req, res) => {
+  const channel = getChannels().find(c => c.id === req.params.id);
+  if (!channel || !channel.url) return res.status(404).send('Not found');
+
+  const targetUrl = channel.url;
+  const options = {
+    headers: {
+      'Referer': 'https://thetvapp.to/',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+  };
+
+  https.get(targetUrl, options, (proxyRes) => {
+    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    proxyRes.pipe(res);
+  }).on('error', (e) => {
+    res.status(500).send(e.message);
+  });
+});
+
+// Proxy for segments (.ts files)
+app.get('/proxy/:id/:segment.ts', (req, res) => {
+  const channel = getChannels().find(c => c.id === req.params.id);
+  if (!channel || !channel.url) return res.status(404).send('Not found');
+
+  // Construct the segment URL based on the master playlist URL
+  const baseUrl = channel.url.substring(0, channel.url.lastIndexOf('/') + 1);
+  const targetUrl = baseUrl + req.params.segment + '.ts';
+
+  const options = {
+    headers: {
+      'Referer': 'https://thetvapp.to/',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+  };
+
+  https.get(targetUrl, options, (proxyRes) => {
+    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    proxyRes.pipe(res);
+  }).on('error', (e) => {
+    res.status(500).send(e.message);
+  });
+});
+
+app.listen(PORT, () => console.log(`Proxy Addon live on ${PORT}`));
