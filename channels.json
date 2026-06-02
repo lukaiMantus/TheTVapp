@@ -1,21 +1,9 @@
 [
   {
-    "id": "thetvapp_espn",
-    "type": "tv",
-    "name": "ESPN",
-    "poster": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/512px-ESPN_wordmark.svg.png",
-    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/ESPN_wordmark.svg/512px-ESPN_wordmark.svg.png",
-    "description": "ESPN live TV metadata entry. Configure an authorized direct HLS URL with STREAM_OVERRIDES or STREAM_URL_THETVAPP_ESPN to enable playback.",
-    "genres": ["Sports", "Live TV"]
-  },
-  {
     "id": "thetvapp_nasa_tv",
     "type": "tv",
     "name": "NASA TV Public",
     "poster": "https://www.nasa.gov/wp-content/themes/nasa/assets/images/nasa-logo.svg",
-    "logo": "https://www.nasa.gov/wp-content/themes/nasa/assets/images/nasa-logo.svg",
-    "description": "NASA TV public livestream.",
-    "genres": ["Science", "Education", "Live TV"],
     "url": "https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8"
   },
   {
@@ -23,29 +11,6 @@
     "type": "tv",
     "name": "HLS Test Channel",
     "poster": "https://dummyimage.com/512x768/1f2937/ffffff.png&text=HLS+Test",
-    "logo": "https://dummyimage.com/512x512/1f2937/ffffff.png&text=HLS",
-    "description": "Continuous HLS test livestream used to verify direct playback compatibility.",
-    "genres": ["Testing", "Live TV"],
     "url": "https://ireplay.tv/test/blender.m3u8"
-  },
-  {
-    "id": "thetvapp_france24_en",
-    "type": "tv",
-    "name": "France 24 English",
-    "poster": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/France24.png/512px-France24.png",
-    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/France24.png/512px-France24.png",
-    "description": "France 24 English international news livestream.",
-    "genres": ["News", "Live TV"],
-    "url": "https://static.france24.com/live/F24_EN_LO_HLS/live_web.m3u8"
-  },
-  {
-    "id": "thetvapp_france24_en_hd",
-    "type": "tv",
-    "name": "France 24 English HD",
-    "poster": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/France24.png/512px-France24.png",
-    "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/France24.png/512px-France24.png",
-    "description": "France 24 English high-bitrate public livestream.",
-    "genres": ["News", "Live TV"],
-    "url": "https://static.france24.com/live/F24_EN_HI_HLS/live_web.m3u8"
   }
 ]
