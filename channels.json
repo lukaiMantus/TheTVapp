@@ -5,7 +5,9 @@
     "name": "A&E",
     "poster": "https://thetvapp.to/img/channels/ae.png",
     "url": "https://thetvapp.to/hls/ae/index.m3u8",
-    "genres": ["Live TV"]
+    "genres": [
+      "Live TV"
+    ]
   },
   {
     "id": "thetvapp_acc-network",
@@ -13,7 +15,9 @@
     "name": "ACC Network",
     "poster": "https://thetvapp.to/img/channels/acc-network.png",
     "url": "https://thetvapp.to/hls/acc-network/index.m3u8",
-    "genres": ["Live TV"]
+    "genres": [
+      "Live TV"
+    ]
   },
   {
     "id": "thetvapp_amc",
@@ -21,63 +25,109 @@
     "name": "AMC",
     "poster": "https://thetvapp.to/img/channels/amc.png",
     "url": "https://thetvapp.to/hls/amc/index.m3u8",
-    "genres": ["Live TV"]
+    "genres": [
+      "Live TV"
+    ]
   },
   {
-    "id": "thetvapp_espn",
+    "id": "thetvapp_american-heroes-channel",
     "type": "tv",
-    "name": "ESPN",
-    "poster": "https://thetvapp.to/img/channels/espn.png",
-    "url": "https://thetvapp.to/hls/espn/index.m3u8",
-    "genres": ["Live TV"]
+    "name": "American Heroes Channel",
+    "poster": "https://thetvapp.to/img/channels/american-heroes-channel.png",
+    "url": "https://thetvapp.to/hls/american-heroes-channel/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
   },
   {
-    "id": "thetvapp_espn2",
+    "id": "thetvapp_animal-planet",
     "type": "tv",
-    "name": "ESPN2",
-    "poster": "https://thetvapp.to/img/channels/espn2.png",
-    "url": "https://thetvapp.to/hls/espn2/index.m3u8",
-    "genres": ["Live TV"]
+    "name": "Animal Planet",
+    "poster": "https://thetvapp.to/img/channels/animal-planet.png",
+    "url": "https://thetvapp.to/hls/animal-planet/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
   },
   {
-    "id": "thetvapp_fox-news-channel",
+    "id": "thetvapp_bbc-america",
     "type": "tv",
-    "name": "FOX News Channel",
-    "poster": "https://thetvapp.to/img/channels/fox-news-channel.png",
-    "url": "https://thetvapp.to/hls/fox-news-channel/index.m3u8",
-    "genres": ["Live TV"]
+    "name": "BBC America",
+    "poster": "https://thetvapp.to/img/channels/bbc-america.png",
+    "url": "https://thetvapp.to/hls/bbc-america/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
   },
   {
-    "id": "thetvapp_cnn",
+    "id": "thetvapp_bbc-world-news-hd",
     "type": "tv",
-    "name": "CNN",
-    "poster": "https://thetvapp.to/img/channels/cnn.png",
-    "url": "https://thetvapp.to/hls/cnn/index.m3u8",
-    "genres": ["Live TV"]
+    "name": "BBC World News HD",
+    "poster": "https://thetvapp.to/img/channels/bbc-world-news-hd.png",
+    "url": "https://thetvapp.to/hls/bbc-world-news-hd/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
   },
   {
-    "id": "thetvapp_msnbc",
+    "id": "thetvapp_bet",
     "type": "tv",
-    "name": "MSNBC",
-    "poster": "https://thetvapp.to/img/channels/msnbc.png",
-    "url": "https://thetvapp.to/hls/msnbc/index.m3u8",
-    "genres": ["Live TV"]
+    "name": "BET",
+    "poster": "https://thetvapp.to/img/channels/bet.png",
+    "url": "https://thetvapp.to/hls/bet/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
   },
   {
-    "id": "thetvapp_hbo-east",
+    "id": "thetvapp_bet-her",
     "type": "tv",
-    "name": "HBO East",
-    "poster": "https://thetvapp.to/img/channels/hbo-east.png",
-    "url": "https://thetvapp.to/hls/hbo-east/index.m3u8",
-    "genres": ["Live TV"]
+    "name": "BET Her",
+    "poster": "https://thetvapp.to/img/channels/bet-her.png",
+    "url": "https://thetvapp.to/hls/bet-her/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
   },
   {
-    "id": "thetvapp_disney-channel-east",
+    "id": "thetvapp_big-ten-network",
     "type": "tv",
-    "name": "Disney Channel (East)",
-    "poster": "https://thetvapp.to/img/channels/disney-channel-east.png",
-    "url": "https://thetvapp.to/hls/disney-channel-east/index.m3u8",
-    "genres": ["Live TV"]
+    "name": "Big Ten Network",
+    "poster": "https://thetvapp.to/img/channels/big-ten-network.png",
+    "url": "https://thetvapp.to/hls/big-ten-network/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_bloomberg-tv",
+    "type": "tv",
+    "name": "Bloomberg TV",
+    "poster": "https://thetvapp.to/img/channels/bloomberg-tv.png",
+    "url": "https://thetvapp.to/hls/bloomberg-tv/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_boomerang",
+    "type": "tv",
+    "name": "Boomerang",
+    "poster": "https://thetvapp.to/img/channels/boomerang.png",
+    "url": "https://thetvapp.to/hls/boomerang/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_bravo",
+    "type": "tv",
+    "name": "Bravo",
+    "poster": "https://thetvapp.to/img/channels/bravo.png",
+    "url": "https://thetvapp.to/hls/bravo/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
   },
   {
     "id": "thetvapp_cartoon-network",
@@ -85,6 +135,1048 @@
     "name": "Cartoon Network",
     "poster": "https://thetvapp.to/img/channels/cartoon-network.png",
     "url": "https://thetvapp.to/hls/cartoon-network/index.m3u8",
-    "genres": ["Live TV"]
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_cbs-sports-network",
+    "type": "tv",
+    "name": "CBS Sports Network",
+    "poster": "https://thetvapp.to/img/channels/cbs-sports-network.png",
+    "url": "https://thetvapp.to/hls/cbs-sports-network/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_cinemax",
+    "type": "tv",
+    "name": "Cinemax",
+    "poster": "https://thetvapp.to/img/channels/cinemax.png",
+    "url": "https://thetvapp.to/hls/cinemax/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_cmt",
+    "type": "tv",
+    "name": "CMT",
+    "poster": "https://thetvapp.to/img/channels/cmt.png",
+    "url": "https://thetvapp.to/hls/cmt/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_cnbc",
+    "type": "tv",
+    "name": "CNBC",
+    "poster": "https://thetvapp.to/img/channels/cnbc.png",
+    "url": "https://thetvapp.to/hls/cnbc/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_cnn",
+    "type": "tv",
+    "name": "CNN",
+    "poster": "https://thetvapp.to/img/channels/cnn.png",
+    "url": "https://thetvapp.to/hls/cnn/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_comedy-central",
+    "type": "tv",
+    "name": "Comedy Central",
+    "poster": "https://thetvapp.to/img/channels/comedy-central.png",
+    "url": "https://thetvapp.to/hls/comedy-central/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_cooking-channel",
+    "type": "tv",
+    "name": "Cooking Channel",
+    "poster": "https://thetvapp.to/img/channels/cooking-channel.png",
+    "url": "https://thetvapp.to/hls/cooking-channel/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_crime-investigation-hd",
+    "type": "tv",
+    "name": "Crime & Investigation HD",
+    "poster": "https://thetvapp.to/img/channels/crime-investigation-hd.png",
+    "url": "https://thetvapp.to/hls/crime-investigation-hd/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_cspan",
+    "type": "tv",
+    "name": "CSPAN",
+    "poster": "https://thetvapp.to/img/channels/cspan.png",
+    "url": "https://thetvapp.to/hls/cspan/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_cspan-2",
+    "type": "tv",
+    "name": "CSPAN 2",
+    "poster": "https://thetvapp.to/img/channels/cspan-2.png",
+    "url": "https://thetvapp.to/hls/cspan-2/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_destination-america",
+    "type": "tv",
+    "name": "Destination America",
+    "poster": "https://thetvapp.to/img/channels/destination-america.png",
+    "url": "https://thetvapp.to/hls/destination-america/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_discovery",
+    "type": "tv",
+    "name": "Discovery",
+    "poster": "https://thetvapp.to/img/channels/discovery.png",
+    "url": "https://thetvapp.to/hls/discovery/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_discovery-family-channel",
+    "type": "tv",
+    "name": "Discovery Family Channel",
+    "poster": "https://thetvapp.to/img/channels/discovery-family-channel.png",
+    "url": "https://thetvapp.to/hls/discovery-family-channel/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_discovery-life",
+    "type": "tv",
+    "name": "Discovery Life",
+    "poster": "https://thetvapp.to/img/channels/discovery-life.png",
+    "url": "https://thetvapp.to/hls/discovery-life/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_disney-channel-east",
+    "type": "tv",
+    "name": "Disney Channel (East)",
+    "poster": "https://thetvapp.to/img/channels/disney-channel-east.png",
+    "url": "https://thetvapp.to/hls/disney-channel-east/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_disney-junior",
+    "type": "tv",
+    "name": "Disney Junior",
+    "poster": "https://thetvapp.to/img/channels/disney-junior.png",
+    "url": "https://thetvapp.to/hls/disney-junior/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_disney-xd",
+    "type": "tv",
+    "name": "Disney XD",
+    "poster": "https://thetvapp.to/img/channels/disney-xd.png",
+    "url": "https://thetvapp.to/hls/disney-xd/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_e",
+    "type": "tv",
+    "name": "E!",
+    "poster": "https://thetvapp.to/img/channels/e.png",
+    "url": "https://thetvapp.to/hls/e/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_espn",
+    "type": "tv",
+    "name": "ESPN",
+    "poster": "https://thetvapp.to/img/channels/espn.png",
+    "url": "https://thetvapp.to/hls/espn/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_espn2",
+    "type": "tv",
+    "name": "ESPN2",
+    "poster": "https://thetvapp.to/img/channels/espn2.png",
+    "url": "https://thetvapp.to/hls/espn2/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_espnews",
+    "type": "tv",
+    "name": "ESPNews",
+    "poster": "https://thetvapp.to/img/channels/espnews.png",
+    "url": "https://thetvapp.to/hls/espnews/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_espnu",
+    "type": "tv",
+    "name": "ESPNU",
+    "poster": "https://thetvapp.to/img/channels/espnu.png",
+    "url": "https://thetvapp.to/hls/espnu/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_food-network",
+    "type": "tv",
+    "name": "Food Network",
+    "poster": "https://thetvapp.to/img/channels/food-network.png",
+    "url": "https://thetvapp.to/hls/food-network/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_fox-business-network",
+    "type": "tv",
+    "name": "Fox Business Network",
+    "poster": "https://thetvapp.to/img/channels/fox-business-network.png",
+    "url": "https://thetvapp.to/hls/fox-business-network/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_fox-news-channel",
+    "type": "tv",
+    "name": "FOX News Channel",
+    "poster": "https://thetvapp.to/img/channels/fox-news-channel.png",
+    "url": "https://thetvapp.to/hls/fox-news-channel/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_fox-sports-1",
+    "type": "tv",
+    "name": "FOX Sports 1",
+    "poster": "https://thetvapp.to/img/channels/fox-sports-1.png",
+    "url": "https://thetvapp.to/hls/fox-sports-1/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_fox-sports-2",
+    "type": "tv",
+    "name": "FOX Sports 2",
+    "poster": "https://thetvapp.to/img/channels/fox-sports-2.png",
+    "url": "https://thetvapp.to/hls/fox-sports-2/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_freeform",
+    "type": "tv",
+    "name": "Freeform",
+    "poster": "https://thetvapp.to/img/channels/freeform.png",
+    "url": "https://thetvapp.to/hls/freeform/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_fuse-hd",
+    "type": "tv",
+    "name": "Fuse HD",
+    "poster": "https://thetvapp.to/img/channels/fuse-hd.png",
+    "url": "https://thetvapp.to/hls/fuse-hd/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_fx",
+    "type": "tv",
+    "name": "FX",
+    "poster": "https://thetvapp.to/img/channels/fx.png",
+    "url": "https://thetvapp.to/hls/fx/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_fx-movie",
+    "type": "tv",
+    "name": "FX Movie",
+    "poster": "https://thetvapp.to/img/channels/fx-movie.png",
+    "url": "https://thetvapp.to/hls/fx-movie/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_fxx",
+    "type": "tv",
+    "name": "FXX",
+    "poster": "https://thetvapp.to/img/channels/fxx.png",
+    "url": "https://thetvapp.to/hls/fxx/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_fyi",
+    "type": "tv",
+    "name": "FYI",
+    "poster": "https://thetvapp.to/img/channels/fyi.png",
+    "url": "https://thetvapp.to/hls/fyi/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_golf-channel",
+    "type": "tv",
+    "name": "Golf Channel",
+    "poster": "https://thetvapp.to/img/channels/golf-channel.png",
+    "url": "https://thetvapp.to/hls/golf-channel/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_hallmark",
+    "type": "tv",
+    "name": "Hallmark",
+    "poster": "https://thetvapp.to/img/channels/hallmark.png",
+    "url": "https://thetvapp.to/hls/hallmark/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_hallmark-drama-hd",
+    "type": "tv",
+    "name": "Hallmark Drama HD",
+    "poster": "https://thetvapp.to/img/channels/hallmark-drama-hd.png",
+    "url": "https://thetvapp.to/hls/hallmark-drama-hd/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_hallmark-movies-mysteries-hd",
+    "type": "tv",
+    "name": "Hallmark Movies & Mysteries HD",
+    "poster": "https://thetvapp.to/img/channels/hallmark-movies-mysteries-hd.png",
+    "url": "https://thetvapp.to/hls/hallmark-movies-mysteries-hd/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_hbo-2-east",
+    "type": "tv",
+    "name": "HBO 2 East",
+    "poster": "https://thetvapp.to/img/channels/hbo-2-east.png",
+    "url": "https://thetvapp.to/hls/hbo-2-east/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_hbo-comedy-hd",
+    "type": "tv",
+    "name": "HBO Comedy HD",
+    "poster": "https://thetvapp.to/img/channels/hbo-comedy-hd.png",
+    "url": "https://thetvapp.to/hls/hbo-comedy-hd/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_hbo-east",
+    "type": "tv",
+    "name": "HBO East",
+    "poster": "https://thetvapp.to/img/channels/hbo-east.png",
+    "url": "https://thetvapp.to/hls/hbo-east/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_hbo-family-east",
+    "type": "tv",
+    "name": "HBO Family East",
+    "poster": "https://thetvapp.to/img/channels/hbo-family-east.png",
+    "url": "https://thetvapp.to/hls/hbo-family-east/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_hbo-signature",
+    "type": "tv",
+    "name": "HBO Signature",
+    "poster": "https://thetvapp.to/img/channels/hbo-signature.png",
+    "url": "https://thetvapp.to/hls/hbo-signature/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_hbo-zone-hd",
+    "type": "tv",
+    "name": "HBO Zone HD",
+    "poster": "https://thetvapp.to/img/channels/hbo-zone-hd.png",
+    "url": "https://thetvapp.to/hls/hbo-zone-hd/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_hgtv",
+    "type": "tv",
+    "name": "HGTV",
+    "poster": "https://thetvapp.to/img/channels/hgtv.png",
+    "url": "https://thetvapp.to/hls/hgtv/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_history",
+    "type": "tv",
+    "name": "History",
+    "poster": "https://thetvapp.to/img/channels/history.png",
+    "url": "https://thetvapp.to/hls/history/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_hln",
+    "type": "tv",
+    "name": "HLN",
+    "poster": "https://thetvapp.to/img/channels/hln.png",
+    "url": "https://thetvapp.to/hls/hln/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_ifc",
+    "type": "tv",
+    "name": "IFC",
+    "poster": "https://thetvapp.to/img/channels/ifc.png",
+    "url": "https://thetvapp.to/hls/ifc/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_investigation-discovery",
+    "type": "tv",
+    "name": "Investigation Discovery",
+    "poster": "https://thetvapp.to/img/channels/investigation-discovery.png",
+    "url": "https://thetvapp.to/hls/investigation-discovery/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_ion-television-east-hd",
+    "type": "tv",
+    "name": "ION Television East HD",
+    "poster": "https://thetvapp.to/img/channels/ion-television-east-hd.png",
+    "url": "https://thetvapp.to/hls/ion-television-east-hd/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_lifetime",
+    "type": "tv",
+    "name": "Lifetime",
+    "poster": "https://thetvapp.to/img/channels/lifetime.png",
+    "url": "https://thetvapp.to/hls/lifetime/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_lmn",
+    "type": "tv",
+    "name": "LMN",
+    "poster": "https://thetvapp.to/img/channels/lmn.png",
+    "url": "https://thetvapp.to/hls/lmn/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_logo",
+    "type": "tv",
+    "name": "Logo",
+    "poster": "https://thetvapp.to/img/channels/logo.png",
+    "url": "https://thetvapp.to/hls/logo/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_metv-toons",
+    "type": "tv",
+    "name": "MeTV Toons",
+    "poster": "https://thetvapp.to/img/channels/metv-toons.png",
+    "url": "https://thetvapp.to/hls/metv-toons/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_mlb-network",
+    "type": "tv",
+    "name": "MLB Network",
+    "poster": "https://thetvapp.to/img/channels/mlb-network.png",
+    "url": "https://thetvapp.to/hls/mlb-network/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_moremax",
+    "type": "tv",
+    "name": "MoreMAX",
+    "poster": "https://thetvapp.to/img/channels/moremax.png",
+    "url": "https://thetvapp.to/hls/moremax/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_motortrend-hd",
+    "type": "tv",
+    "name": "MotorTrend HD",
+    "poster": "https://thetvapp.to/img/channels/motortrend-hd.png",
+    "url": "https://thetvapp.to/hls/motortrend-hd/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_moviemax",
+    "type": "tv",
+    "name": "MovieMAX",
+    "poster": "https://thetvapp.to/img/channels/moviemax.png",
+    "url": "https://thetvapp.to/hls/moviemax/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_msnbc",
+    "type": "tv",
+    "name": "MSNBC",
+    "poster": "https://thetvapp.to/img/channels/msnbc.png",
+    "url": "https://thetvapp.to/hls/msnbc/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_mtv",
+    "type": "tv",
+    "name": "MTV",
+    "poster": "https://thetvapp.to/img/channels/mtv.png",
+    "url": "https://thetvapp.to/hls/mtv/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_nat-geo-wild",
+    "type": "tv",
+    "name": "Nat Geo WILD",
+    "poster": "https://thetvapp.to/img/channels/nat-geo-wild.png",
+    "url": "https://thetvapp.to/hls/nat-geo-wild/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_national-geographic",
+    "type": "tv",
+    "name": "National Geographic",
+    "poster": "https://thetvapp.to/img/channels/national-geographic.png",
+    "url": "https://thetvapp.to/hls/national-geographic/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_nba-tv",
+    "type": "tv",
+    "name": "NBA TV",
+    "poster": "https://thetvapp.to/img/channels/nba-tv.png",
+    "url": "https://thetvapp.to/hls/nba-tv/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_newsmax-tv",
+    "type": "tv",
+    "name": "Newsmax TV",
+    "poster": "https://thetvapp.to/img/channels/newsmax-tv.png",
+    "url": "https://thetvapp.to/hls/newsmax-tv/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_nfl-network",
+    "type": "tv",
+    "name": "NFL Network",
+    "poster": "https://thetvapp.to/img/channels/nfl-network.png",
+    "url": "https://thetvapp.to/hls/nfl-network/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_nfl-red-zone",
+    "type": "tv",
+    "name": "NFL Red Zone",
+    "poster": "https://thetvapp.to/img/channels/nfl-red-zone.png",
+    "url": "https://thetvapp.to/hls/nfl-red-zone/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_nhl-network",
+    "type": "tv",
+    "name": "NHL Network",
+    "poster": "https://thetvapp.to/img/channels/nhl-network.png",
+    "url": "https://thetvapp.to/hls/nhl-network/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_nick-jr",
+    "type": "tv",
+    "name": "Nick Jr.",
+    "poster": "https://thetvapp.to/img/channels/nick-jr.png",
+    "url": "https://thetvapp.to/hls/nick-jr/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_nickelodeon-east",
+    "type": "tv",
+    "name": "Nickelodeon East",
+    "poster": "https://thetvapp.to/img/channels/nickelodeon-east.png",
+    "url": "https://thetvapp.to/hls/nickelodeon-east/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_nicktoons",
+    "type": "tv",
+    "name": "Nicktoons",
+    "poster": "https://thetvapp.to/img/channels/nicktoons.png",
+    "url": "https://thetvapp.to/hls/nicktoons/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_outdoor-channel",
+    "type": "tv",
+    "name": "Outdoor Channel",
+    "poster": "https://thetvapp.to/img/channels/outdoor-channel.png",
+    "url": "https://thetvapp.to/hls/outdoor-channel/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_own",
+    "type": "tv",
+    "name": "OWN",
+    "poster": "https://thetvapp.to/img/channels/own.png",
+    "url": "https://thetvapp.to/hls/own/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_oxygen-true-crime",
+    "type": "tv",
+    "name": "Oxygen True Crime",
+    "poster": "https://thetvapp.to/img/channels/oxygen-true-crime.png",
+    "url": "https://thetvapp.to/hls/oxygen-true-crime/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_pbs-13-wnet-new-york",
+    "type": "tv",
+    "name": "PBS 13 (WNET) New York",
+    "poster": "https://thetvapp.to/img/channels/pbs-13-wnet-new-york.png",
+    "url": "https://thetvapp.to/hls/pbs-13-wnet-new-york/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_reelzchannel",
+    "type": "tv",
+    "name": "ReelzChannel",
+    "poster": "https://thetvapp.to/img/channels/reelzchannel.png",
+    "url": "https://thetvapp.to/hls/reelzchannel/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_science",
+    "type": "tv",
+    "name": "Science",
+    "poster": "https://thetvapp.to/img/channels/science.png",
+    "url": "https://thetvapp.to/hls/science/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_sec-network",
+    "type": "tv",
+    "name": "SEC Network",
+    "poster": "https://thetvapp.to/img/channels/sec-network.png",
+    "url": "https://thetvapp.to/hls/sec-network/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_showtime-e",
+    "type": "tv",
+    "name": "Showtime (E)",
+    "poster": "https://thetvapp.to/img/channels/showtime-e.png",
+    "url": "https://thetvapp.to/hls/showtime-e/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_showtime-2",
+    "type": "tv",
+    "name": "SHOWTIME 2",
+    "poster": "https://thetvapp.to/img/channels/showtime-2.png",
+    "url": "https://thetvapp.to/hls/showtime-2/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_starz-east",
+    "type": "tv",
+    "name": "STARZ East",
+    "poster": "https://thetvapp.to/img/channels/starz-east.png",
+    "url": "https://thetvapp.to/hls/starz-east/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_sundancetv-hd",
+    "type": "tv",
+    "name": "SundanceTV HD",
+    "poster": "https://thetvapp.to/img/channels/sundancetv-hd.png",
+    "url": "https://thetvapp.to/hls/sundancetv-hd/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_syfy",
+    "type": "tv",
+    "name": "SYFY",
+    "poster": "https://thetvapp.to/img/channels/syfy.png",
+    "url": "https://thetvapp.to/hls/syfy/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_tbs",
+    "type": "tv",
+    "name": "TBS",
+    "poster": "https://thetvapp.to/img/channels/tbs.png",
+    "url": "https://thetvapp.to/hls/tbs/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_tcm",
+    "type": "tv",
+    "name": "TCM",
+    "poster": "https://thetvapp.to/img/channels/tcm.png",
+    "url": "https://thetvapp.to/hls/tcm/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_teennick",
+    "type": "tv",
+    "name": "TeenNick",
+    "poster": "https://thetvapp.to/img/channels/teennick.png",
+    "url": "https://thetvapp.to/hls/teennick/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_telemundo-east",
+    "type": "tv",
+    "name": "Telemundo East",
+    "poster": "https://thetvapp.to/img/channels/telemundo-east.png",
+    "url": "https://thetvapp.to/hls/telemundo-east/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_tennis-channel",
+    "type": "tv",
+    "name": "Tennis Channel",
+    "poster": "https://thetvapp.to/img/channels/tennis-channel.png",
+    "url": "https://thetvapp.to/hls/tennis-channel/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_the-cw",
+    "type": "tv",
+    "name": "The CW (WPIX New York)",
+    "poster": "https://thetvapp.to/img/channels/the-cw.png",
+    "url": "https://thetvapp.to/hls/the-cw/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_the-movie-channel-east",
+    "type": "tv",
+    "name": "The Movie Channel East",
+    "poster": "https://thetvapp.to/img/channels/the-movie-channel-east.png",
+    "url": "https://thetvapp.to/hls/the-movie-channel-east/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_the-weather-channel",
+    "type": "tv",
+    "name": "The Weather Channel",
+    "poster": "https://thetvapp.to/img/channels/the-weather-channel.png",
+    "url": "https://thetvapp.to/hls/the-weather-channel/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_tlc",
+    "type": "tv",
+    "name": "TLC",
+    "poster": "https://thetvapp.to/img/channels/tlc.png",
+    "url": "https://thetvapp.to/hls/tlc/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_tnt",
+    "type": "tv",
+    "name": "TNT",
+    "poster": "https://thetvapp.to/img/channels/tnt.png",
+    "url": "https://thetvapp.to/hls/tnt/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_travel-channel",
+    "type": "tv",
+    "name": "Travel Channel",
+    "poster": "https://thetvapp.to/img/channels/travel-channel.png",
+    "url": "https://thetvapp.to/hls/travel-channel/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_trutv",
+    "type": "tv",
+    "name": "truTV",
+    "poster": "https://thetvapp.to/img/channels/trutv.png",
+    "url": "https://thetvapp.to/hls/trutv/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_tv-one-hd",
+    "type": "tv",
+    "name": "TV One HD",
+    "poster": "https://thetvapp.to/img/channels/tv-one-hd.png",
+    "url": "https://thetvapp.to/hls/tv-one-hd/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_universal-kids",
+    "type": "tv",
+    "name": "Universal Kids",
+    "poster": "https://thetvapp.to/img/channels/universal-kids.png",
+    "url": "https://thetvapp.to/hls/universal-kids/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_univision-east",
+    "type": "tv",
+    "name": "Univision East",
+    "poster": "https://thetvapp.to/img/channels/univision-east.png",
+    "url": "https://thetvapp.to/hls/univision-east/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_usa-network",
+    "type": "tv",
+    "name": "USA Network",
+    "poster": "https://thetvapp.to/img/channels/usa-network.png",
+    "url": "https://thetvapp.to/hls/usa-network/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_vh1",
+    "type": "tv",
+    "name": "VH1",
+    "poster": "https://thetvapp.to/img/channels/vh1.png",
+    "url": "https://thetvapp.to/hls/vh1/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_vice",
+    "type": "tv",
+    "name": "VICE",
+    "poster": "https://thetvapp.to/img/channels/vice.png",
+    "url": "https://thetvapp.to/hls/vice/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_wabc-new-york-abc-east",
+    "type": "tv",
+    "name": "WABC (New York) ABC East",
+    "poster": "https://thetvapp.to/img/channels/wabc-new-york-abc-east.png",
+    "url": "https://thetvapp.to/hls/wabc-new-york-abc-east/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_wcbs-new-york-cbs-east",
+    "type": "tv",
+    "name": "WCBS (New York) CBS East",
+    "poster": "https://thetvapp.to/img/channels/wcbs-new-york-cbs-east.png",
+    "url": "https://thetvapp.to/hls/wcbs-new-york-cbs-east/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_we-tv",
+    "type": "tv",
+    "name": "WE tv",
+    "poster": "https://thetvapp.to/img/channels/we-tv.png",
+    "url": "https://thetvapp.to/hls/we-tv/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_wnbc-new-york-nbc-east",
+    "type": "tv",
+    "name": "WNBC (New York) NBC East",
+    "poster": "https://thetvapp.to/img/channels/wnbc-new-york-nbc-east.png",
+    "url": "https://thetvapp.to/hls/wnbc-new-york-nbc-east/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
+  },
+  {
+    "id": "thetvapp_wnyw-new-york-fox-east",
+    "type": "tv",
+    "name": "WNYW (New York) FOX East",
+    "poster": "https://thetvapp.to/img/channels/wnyw-new-york-fox-east.png",
+    "url": "https://thetvapp.to/hls/wnyw-new-york-fox-east/index.m3u8",
+    "genres": [
+      "Live TV"
+    ]
   }
 ]
