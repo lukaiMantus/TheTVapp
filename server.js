@@ -12,7 +12,7 @@ app.use(cors());
 
 const manifest = {
   id: 'org.stremio.thetvapp',
-  version: '1.1.3',
+  version: '1.1.4',
   name: 'TheTVApp (No-VPN)',
   description: 'Watch live TV channels without a VPN (Smart Proxy)',
   resources: ['catalog', 'meta', 'stream'],
@@ -22,6 +22,23 @@ const manifest = {
 };
 
 let cachedChannels = [];
+
+// HARDCODED FALLBACK CHANNELS
+const fallbackChannels = [
+  {
+    id: "thetvapp_tlceast",
+    name: "TLC USA Eastern",
+    url: "https://thetvapp.to/hls/tlceast/index.m3u8",
+    poster: "https://thetvapp.to/img/channels/tlceast.png"
+  },
+  {
+    id: "thetvapp_tlc",
+    name: "TLC USA",
+    url: "https://thetvapp.to/hls/tlc/index.m3u8",
+    poster: "https://thetvapp.to/img/channels/tlc.png"
+  }
+];
+
 function loadChannels() {
   try {
     const paths = [
@@ -37,13 +54,15 @@ function loadChannels() {
       }
     }
   } catch (e) {}
+  if (cachedChannels.length === 0) {
+    cachedChannels = fallbackChannels;
+  }
 }
 loadChannels();
 
 app.get('/manifest.json', (req, res) => res.json(manifest));
 
 app.get('/catalog/tv/thetvapp_channels.json', (req, res) => {
-  if (cachedChannels.length === 0) loadChannels();
   const metas = cachedChannels.map(c => ({
     id: c.id, type: 'tv', name: c.name, poster: c.poster
   }));
@@ -51,13 +70,11 @@ app.get('/catalog/tv/thetvapp_channels.json', (req, res) => {
 });
 
 app.get('/meta/tv/:id.json', (req, res) => {
-  if (cachedChannels.length === 0) loadChannels();
   const channel = cachedChannels.find(c => c.id === req.params.id);
   res.json({ meta: channel ? { ...channel, type: 'tv' } : null });
 });
 
 app.get('/stream/tv/:id.json', (req, res) => {
-  if (cachedChannels.length === 0) loadChannels();
   const channel = cachedChannels.find(c => c.id === req.params.id);
   if (!channel) return res.json({ streams: [] });
   const host = req.get('host');
@@ -72,7 +89,6 @@ app.get('/stream/tv/:id.json', (req, res) => {
 });
 
 app.get('/proxy/:id/index.m3u8', (req, res) => {
-  if (cachedChannels.length === 0) loadChannels();
   const channel = cachedChannels.find(c => c.id === req.params.id);
   if (!channel) return res.status(404).send('Not Found');
   const options = {
@@ -95,7 +111,6 @@ app.get('/proxy/:id/index.m3u8', (req, res) => {
 });
 
 app.get('/proxy/:id/:segment.ts', (req, res) => {
-  if (cachedChannels.length === 0) loadChannels();
   const channel = cachedChannels.find(c => c.id === req.params.id);
   if (!channel) return res.status(404).send('Not Found');
   const baseUrl = channel.url.substring(0, channel.url.lastIndexOf('/') + 1);
@@ -112,4 +127,4 @@ app.get('/proxy/:id/:segment.ts', (req, res) => {
   }).on('error', (e) => res.status(500).send(e.message));
 });
 
-app.listen(PORT, () => console.log(`Smart Proxy v1.1.3 live on ${PORT}`));
+app.listen(PORT, () => console.log(`Smart Proxy v1.1.4 live on ${PORT}`));
