@@ -12,7 +12,7 @@ app.use(cors());
 
 const manifest = {
   id: 'org.stremio.thetvapp',
-  version: '1.1.4',
+  version: '1.1.5',
   name: 'TheTVApp (No-VPN)',
   description: 'Watch live TV channels without a VPN (Smart Proxy)',
   resources: ['catalog', 'meta', 'stream'],
@@ -41,20 +41,15 @@ const fallbackChannels = [
 
 function loadChannels() {
   try {
-    const paths = [
-      path.join(__dirname, 'channels.json'),
-      path.join(__dirname, 'data', 'channels.json'),
-      '/opt/render/project/src/channels.json',
-      '/opt/render/project/src/data/channels.json'
-    ];
-    for (const p of paths) {
-      if (fs.existsSync(p)) {
-        cachedChannels = JSON.parse(fs.readFileSync(p, 'utf8'));
-        return;
-      }
+    const p = path.join(__dirname, 'channels.json');
+    const p2 = path.join(__dirname, 'data', 'channels.json');
+    if (fs.existsSync(p)) {
+      cachedChannels = JSON.parse(fs.readFileSync(p, 'utf8'));
+    } else if (fs.existsSync(p2)) {
+      cachedChannels = JSON.parse(fs.readFileSync(p2, 'utf8'));
     }
   } catch (e) {}
-  if (cachedChannels.length === 0) {
+  if (!cachedChannels || cachedChannels.length === 0) {
     cachedChannels = fallbackChannels;
   }
 }
@@ -127,4 +122,4 @@ app.get('/proxy/:id/:segment.ts', (req, res) => {
   }).on('error', (e) => res.status(500).send(e.message));
 });
 
-app.listen(PORT, () => console.log(`Smart Proxy v1.1.4 live on ${PORT}`));
+app.listen(PORT, () => console.log(`Smart Proxy v1.1.5 live on ${PORT}`));
