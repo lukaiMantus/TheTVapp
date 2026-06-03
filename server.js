@@ -2,6 +2,8 @@
 const express = require('express');
 const cors = require('cors');
 const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 7000;
@@ -10,7 +12,7 @@ app.use(cors());
 
 const manifest = {
   id: 'org.stremio.thetvapp',
-  version: '1.1.7',
+  version: '1.1.8',
   name: 'TheTVApp (No-VPN)',
   description: 'Watch live TV channels without a VPN (Smart Proxy)',
   resources: ['catalog', 'meta', 'stream'],
@@ -19,12 +21,97 @@ const manifest = {
   idPrefixes: ['thetvapp_']
 };
 
-const channels = {
-  'thetvapp_tlceast': { streamName: 'TLCEast', name: 'TLC USA Eastern', poster: 'https://thetvapp.to/img/channels/tlceast.png' },
-  'thetvapp_tlc': { streamName: 'TLC', name: 'TLC USA', poster: 'https://thetvapp.to/img/channels/tlc.png' },
-  'thetvapp_ae': { streamName: 'AEEast', name: 'A&E Eastern', poster: 'https://thetvapp.to/img/channels/ae.png' },
-  'thetvapp_amc': { streamName: 'AMCEast', name: 'AMC Eastern', poster: 'https://thetvapp.to/img/channels/amc.png' }
-};
+const fallbackChannels = [
+  {
+    id: 'thetvapp_tlceast',
+    type: 'tv',
+    name: 'TLC USA Eastern',
+    poster: 'https://thetvapp.to/img/channels/tlceast.png',
+    url: 'https://thetvapp.to/hls/TLCEast/index.m3u8',
+    genres: ['Live TV']
+  },
+  {
+    id: 'thetvapp_aeeast',
+    type: 'tv',
+    name: 'A&E US Eastern Feed',
+    poster: 'https://thetvapp.to/img/channels/aeeast.png',
+    url: 'https://thetvapp.to/hls/AEEast/index.m3u8',
+    genres: ['Live TV']
+  },
+  {
+    id: 'thetvapp_amceast',
+    type: 'tv',
+    name: 'AMC Eastern Feed',
+    poster: 'https://thetvapp.to/img/channels/amceast.png',
+    url: 'https://thetvapp.to/hls/AMCEast/index.m3u8',
+    genres: ['Live TV']
+  }
+];
+
+let cachedChannels = [];
+
+function cleanChannel(channel) {
+  const id = String(channel.id || '').trim();
+  const name = String(channel.name || id.replace(/^thetvapp_/, '')).trim();
+  const url = String(channel.url || '').trim();
+  if (!id || !url) return null;
+
+  return {
+    id,
+    type: channel.type || 'tv',
+    name,
+    poster: channel.poster || channel.logo || '',
+    logo: channel.logo || channel.poster || '',
+    url,
+    genres: Array.isArray(channel.genres) && channel.genres.length ? channel.genres : ['Live TV']
+  };
+}
+
+function loadChannels() {
+  const paths = [
+    path.join(__dirname, 'channels.json'),
+    path.join(__dirname, 'data', 'channels.json'),
+    path.join(process.cwd(), 'channels.json'),
+    path.join(process.cwd(), 'data', 'channels.json'),
+    '/opt/render/project/src/channels.json',
+    '/opt/render/project/src/data/channels.json'
+  ];
+
+  for (const filePath of paths) {
+    try {
+      if (!fs.existsSync(filePath)) continue;
+      const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      if (!Array.isArray(parsed)) continue;
+      const cleaned = parsed.map(cleanChannel).filter(Boolean);
+      if (cleaned.length > 0) {
+        cachedChannels = cleaned;
+        console.log(`Loaded ${cachedChannels.length} channels from ${filePath}`);
+        return cachedChannels;
+      }
+    } catch (error) {
+      console.error(`Could not load channels from ${filePath}:`, error.message);
+    }
+  }
+
+  cachedChannels = fallbackChannels.map(cleanChannel).filter(Boolean);
+  console.log(`Using fallback channel list with ${cachedChannels.length} channels`);
+  return cachedChannels;
+}
+
+function getChannels() {
+  if (!cachedChannels.length) loadChannels();
+  return cachedChannels;
+}
+
+function getChannel(id) {
+  return getChannels().find((channel) => channel.id === id);
+}
+
+function getStreamName(channel) {
+  const match = String(channel.url || '').match(/\/hls\/([^/]+)\//i);
+  if (match && match[1]) return match[1];
+  return channel.id.replace(/^thetvapp_/, '');
+}
 
 function headers() {
   return {
@@ -40,15 +127,21 @@ function httpsGetText(targetUrl) {
       if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
         return resolve({ redirectedTo: response.headers.location, body: '' });
       }
+
       let body = '';
       response.on('data', (chunk) => { body += chunk; });
-      response.on('end', () => resolve({ statusCode: response.statusCode, headers: response.headers, body }));
+      response.on('end', () => resolve({
+        statusCode: response.statusCode,
+        headers: response.headers,
+        body
+      }));
     }).on('error', reject);
   });
 }
 
-async function discoverStreamUrl(streamName) {
-  const tvpassUrl = `https://tvpass.org/live/${streamName}/sd`;
+async function discoverStreamUrl(channel) {
+  const streamName = getStreamName(channel);
+  const tvpassUrl = `https://tvpass.org/live/${encodeURIComponent(streamName)}/sd`;
   const first = await httpsGetText(tvpassUrl);
   return first.redirectedTo || tvpassUrl;
 }
@@ -66,62 +159,69 @@ function proxiedUrl(req, targetUrl) {
 }
 
 app.get('/', (req, res) => {
-  res.json({ name: manifest.name, version: manifest.version, manifest: `https://${req.get('host')}/manifest.json` });
+  res.json({
+    name: manifest.name,
+    version: manifest.version,
+    channelCount: getChannels().length,
+    manifest: `https://${req.get('host')}/manifest.json`
+  });
 });
 
 app.get('/manifest.json', (req, res) => res.json(manifest));
 
 app.get('/catalog/tv/thetvapp_channels.json', (req, res) => {
-  const metas = Object.entries(channels).map(([id, channel]) => ({
-    id,
+  const metas = getChannels().map((channel) => ({
+    id: channel.id,
     type: 'tv',
     name: channel.name,
     poster: channel.poster,
-    logo: channel.poster,
+    logo: channel.logo || channel.poster,
     description: `${channel.name} live TV channel`,
-    genres: ['Live TV']
+    genres: channel.genres || ['Live TV']
   }));
   res.json({ metas });
 });
 
 app.get('/meta/tv/:id.json', (req, res) => {
-  const channel = channels[req.params.id];
+  const channel = getChannel(req.params.id);
   if (!channel) return res.json({ meta: null });
+
   res.json({
     meta: {
-      id: req.params.id,
+      id: channel.id,
       type: 'tv',
       name: channel.name,
       poster: channel.poster,
-      logo: channel.poster,
+      logo: channel.logo || channel.poster,
       background: channel.poster,
       description: `${channel.name} live TV channel`,
-      genres: ['Live TV'],
+      genres: channel.genres || ['Live TV'],
       runtime: 'Live',
-      videos: [{ id: req.params.id, title: 'Live TV' }]
+      videos: [{ id: channel.id, title: 'Live TV' }]
     }
   });
 });
 
 app.get('/stream/tv/:id.json', (req, res) => {
-  const channel = channels[req.params.id];
+  const channel = getChannel(req.params.id);
   if (!channel) return res.json({ streams: [] });
+
   res.json({
     streams: [{
       name: 'Smart Relay',
       title: channel.name,
-      url: `https://${req.get('host')}/play/${req.params.id}/index.m3u8`,
+      url: `https://${req.get('host')}/play/${channel.id}/index.m3u8`,
       behaviorHints: { notWebReady: false }
     }]
   });
 });
 
 app.get('/play/:id/index.m3u8', async (req, res) => {
-  const channel = channels[req.params.id];
-  if (!channel) return res.status(404).send('Not Found');
+  const channel = getChannel(req.params.id);
+  if (!channel) return res.status(404).send('Channel Not Found');
 
   try {
-    const realStreamUrl = await discoverStreamUrl(channel.streamName);
+    const realStreamUrl = await discoverStreamUrl(channel);
     const playlist = await httpsGetText(realStreamUrl);
 
     if (!playlist.body || !playlist.body.includes('#EXTM3U')) {
@@ -131,7 +231,6 @@ app.get('/play/:id/index.m3u8', async (req, res) => {
     const rewritten = playlist.body.split(/\r?\n/).map((line) => {
       const trimmed = line.trim();
       if (!trimmed || trimmed.startsWith('#')) return line;
-
       const target = new URL(trimmed, realStreamUrl).href;
       return proxiedUrl(req, target);
     }).join('\n');
@@ -161,4 +260,8 @@ app.get('/segment/:encoded', (req, res) => {
   }).on('error', (error) => res.status(500).send(error.message));
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`Smart Proxy v1.1.7 live on ${PORT}`));
+loadChannels();
+
+app.listen(PORT, '0.0.0.0', () => console.log(`Smart Proxy v1.1.8 live on ${PORT}`));
+
+module.exports = app;
