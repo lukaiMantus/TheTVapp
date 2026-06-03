@@ -12,7 +12,7 @@ app.use(cors());
 
 const manifest = {
   id: 'org.stremio.thetvapp',
-  version: '1.1.0',
+  version: '1.1.1',
   name: 'TheTVApp (No-VPN)',
   description: 'Watch live TV channels without a VPN (Smart Proxy)',
   resources: ['catalog', 'meta', 'stream'],
@@ -21,33 +21,34 @@ const manifest = {
   idPrefixes: ['thetvapp_']
 };
 
-function getChannels() {
+let cachedChannels = [];
+function loadChannels() {
   try {
     const p = path.join(__dirname, 'channels.json');
     if (fs.existsSync(p)) {
-      return JSON.parse(fs.readFileSync(p, 'utf8'));
+      cachedChannels = JSON.parse(fs.readFileSync(p, 'utf8'));
     }
   } catch (e) {}
-  return [];
 }
+loadChannels();
 
 app.get('/manifest.json', (req, res) => res.json(manifest));
 
 app.get('/catalog/tv/thetvapp_channels.json', (req, res) => {
-  const metas = getChannels().map(c => ({
+  const metas = cachedChannels.map(c => ({
     id: c.id, type: 'tv', name: c.name, poster: c.poster
   }));
   res.json({ metas });
 });
 
 app.get('/meta/tv/:id.json', (req, res) => {
-  const channel = getChannels().find(c => c.id === req.params.id);
+  const channel = cachedChannels.find(c => c.id === req.params.id);
   res.json({ meta: channel ? { ...channel, type: 'tv' } : null });
 });
 
 app.get('/stream/tv/:id.json', (req, res) => {
-  const channel = getChannels().find(c => c.id === req.params.id);
-  if (!channel || !channel.url) return res.json({ streams: [] });
+  const channel = cachedChannels.find(c => c.id === req.params.id);
+  if (!channel) return res.json({ streams: [] });
   const host = req.get('host');
   const proxyUrl = `https://${host}/proxy/${channel.id}/index.m3u8`;
   res.json({
@@ -60,8 +61,8 @@ app.get('/stream/tv/:id.json', (req, res) => {
 });
 
 app.get('/proxy/:id/index.m3u8', (req, res) => {
-  const channel = getChannels().find(c => c.id === req.params.id);
-  if (!channel || !channel.url) return res.status(404).send('Not found');
+  const channel = cachedChannels.find(c => c.id === req.params.id);
+  if (!channel) return res.status(404).send('Not Found');
   const options = {
     headers: {
       'Referer': 'https://thetvapp.to/',
@@ -82,8 +83,8 @@ app.get('/proxy/:id/index.m3u8', (req, res) => {
 });
 
 app.get('/proxy/:id/:segment.ts', (req, res) => {
-  const channel = getChannels().find(c => c.id === req.params.id);
-  if (!channel || !channel.url) return res.status(404).send('Not found');
+  const channel = cachedChannels.find(c => c.id === req.params.id);
+  if (!channel) return res.status(404).send('Not Found');
   const baseUrl = channel.url.substring(0, channel.url.lastIndexOf('/') + 1);
   const targetUrl = baseUrl + req.params.segment + '.ts';
   const options = {
@@ -98,4 +99,4 @@ app.get('/proxy/:id/:segment.ts', (req, res) => {
   }).on('error', (e) => res.status(500).send(e.message));
 });
 
-app.listen(PORT, () => console.log(`Smart Proxy v1.1.0 live on ${PORT}`));
+app.listen(PORT, () => console.log(`Smart Proxy v1.1.1 live on ${PORT}`));
