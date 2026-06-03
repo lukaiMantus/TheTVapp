@@ -12,7 +12,7 @@ app.use(cors());
 
 const manifest = {
   id: 'org.stremio.thetvapp',
-  version: '1.0.7',
+  version: '1.0.8',
   name: 'TheTVApp (No-VPN)',
   description: 'Watch live TV channels without a VPN (Smart Proxy)',
   resources: ['catalog', 'meta', 'stream'],
@@ -49,7 +49,8 @@ app.get('/stream/tv/:id.json', (req, res) => {
   const channel = getChannels().find(c => c.id === req.params.id);
   if (!channel || !channel.url) return res.json({ streams: [] });
   const host = req.get('host');
-  const proxyUrl = `https://${host}/proxy/${channel.id}/index.m3u8`;
+  const protocol = req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
+  const proxyUrl = `${protocol}://${host}/proxy/${channel.id}/index.m3u8`;
   res.json({
     streams: [{
       name: 'Smart Relay (No VPN)',
@@ -73,14 +74,13 @@ app.get('/proxy/:id/index.m3u8', (req, res) => {
     proxyRes.on('data', (chunk) => { data += chunk; });
     proxyRes.on('end', () => {
       const host = req.get('host');
-      const baseUrl = `https://${host}/proxy/${req.params.id}/`;
+      const protocol = req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
+      const baseUrl = `${protocol}://${host}/proxy/${req.params.id}/`;
       const rewrittenData = data.replace(/([a-zA-Z0-9_-]+\.ts)/g, `${baseUrl}$1`);
       res.set('Content-Type', 'application/vnd.apple.mpegurl');
       res.send(rewrittenData);
     });
-  }).on('error', (e) => {
-    res.status(500).send(e.message);
-  });
+  }).on('error', (e) => res.status(500).send(e.message));
 });
 
 app.get('/proxy/:id/:segment.ts', (req, res) => {
@@ -97,9 +97,7 @@ app.get('/proxy/:id/:segment.ts', (req, res) => {
   https.get(targetUrl, options, (proxyRes) => {
     res.writeHead(proxyRes.statusCode, proxyRes.headers);
     proxyRes.pipe(res);
-  }).on('error', (e) => {
-    res.status(500).send(e.message);
-  });
+  }).on('error', (e) => res.status(500).send(e.message));
 });
 
-app.listen(PORT, () => console.log(`Smart Proxy live on ${PORT}`));
+app.listen(PORT, () => console.log(`Smart Proxy v1.0.8 live on ${PORT}`));
