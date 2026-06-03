@@ -12,7 +12,7 @@ app.use(cors());
 
 const manifest = {
   id: 'org.stremio.thetvapp',
-  version: '1.1.2',
+  version: '1.1.3',
   name: 'TheTVApp (No-VPN)',
   description: 'Watch live TV channels without a VPN (Smart Proxy)',
   resources: ['catalog', 'meta', 'stream'],
@@ -26,7 +26,9 @@ function loadChannels() {
   try {
     const paths = [
       path.join(__dirname, 'channels.json'),
-      path.join(__dirname, 'data', 'channels.json')
+      path.join(__dirname, 'data', 'channels.json'),
+      '/opt/render/project/src/channels.json',
+      '/opt/render/project/src/data/channels.json'
     ];
     for (const p of paths) {
       if (fs.existsSync(p)) {
@@ -41,6 +43,7 @@ loadChannels();
 app.get('/manifest.json', (req, res) => res.json(manifest));
 
 app.get('/catalog/tv/thetvapp_channels.json', (req, res) => {
+  if (cachedChannels.length === 0) loadChannels();
   const metas = cachedChannels.map(c => ({
     id: c.id, type: 'tv', name: c.name, poster: c.poster
   }));
@@ -48,11 +51,13 @@ app.get('/catalog/tv/thetvapp_channels.json', (req, res) => {
 });
 
 app.get('/meta/tv/:id.json', (req, res) => {
+  if (cachedChannels.length === 0) loadChannels();
   const channel = cachedChannels.find(c => c.id === req.params.id);
   res.json({ meta: channel ? { ...channel, type: 'tv' } : null });
 });
 
 app.get('/stream/tv/:id.json', (req, res) => {
+  if (cachedChannels.length === 0) loadChannels();
   const channel = cachedChannels.find(c => c.id === req.params.id);
   if (!channel) return res.json({ streams: [] });
   const host = req.get('host');
@@ -67,6 +72,7 @@ app.get('/stream/tv/:id.json', (req, res) => {
 });
 
 app.get('/proxy/:id/index.m3u8', (req, res) => {
+  if (cachedChannels.length === 0) loadChannels();
   const channel = cachedChannels.find(c => c.id === req.params.id);
   if (!channel) return res.status(404).send('Not Found');
   const options = {
@@ -89,6 +95,7 @@ app.get('/proxy/:id/index.m3u8', (req, res) => {
 });
 
 app.get('/proxy/:id/:segment.ts', (req, res) => {
+  if (cachedChannels.length === 0) loadChannels();
   const channel = cachedChannels.find(c => c.id === req.params.id);
   if (!channel) return res.status(404).send('Not Found');
   const baseUrl = channel.url.substring(0, channel.url.lastIndexOf('/') + 1);
@@ -105,4 +112,4 @@ app.get('/proxy/:id/:segment.ts', (req, res) => {
   }).on('error', (e) => res.status(500).send(e.message));
 });
 
-app.listen(PORT, () => console.log(`Smart Proxy v1.1.2 live on ${PORT}`));
+app.listen(PORT, () => console.log(`Smart Proxy v1.1.3 live on ${PORT}`));
