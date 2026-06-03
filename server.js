@@ -1,8 +1,6 @@
 'use strict';
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
 const https = require('https');
 
 const app = express();
@@ -12,7 +10,7 @@ app.use(cors());
 
 const manifest = {
   id: 'org.stremio.thetvapp',
-  version: '1.1.6',
+  version: '1.1.7',
   name: 'TheTVApp (No-VPN)',
   description: 'Watch live TV channels without a VPN (Smart Proxy)',
   resources: ['catalog', 'meta', 'stream'],
@@ -21,117 +19,146 @@ const manifest = {
   idPrefixes: ['thetvapp_']
 };
 
-const channelMap = {
-  'thetvapp_tlceast': 'TLCEast',
-  'thetvapp_tlc': 'TLC',
-  'thetvapp_ae': 'AEEast',
-  'thetvapp_amc': 'AMCEast'
+const channels = {
+  'thetvapp_tlceast': { streamName: 'TLCEast', name: 'TLC USA Eastern', poster: 'https://thetvapp.to/img/channels/tlceast.png' },
+  'thetvapp_tlc': { streamName: 'TLC', name: 'TLC USA', poster: 'https://thetvapp.to/img/channels/tlc.png' },
+  'thetvapp_ae': { streamName: 'AEEast', name: 'A&E Eastern', poster: 'https://thetvapp.to/img/channels/ae.png' },
+  'thetvapp_amc': { streamName: 'AMCEast', name: 'AMC Eastern', poster: 'https://thetvapp.to/img/channels/amc.png' }
 };
+
+function headers() {
+  return {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Referer': 'https://thetvapp.to/',
+    'Accept': '*/*'
+  };
+}
+
+function httpsGetText(targetUrl) {
+  return new Promise((resolve, reject) => {
+    https.get(targetUrl, { headers: headers() }, (response) => {
+      if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+        return resolve({ redirectedTo: response.headers.location, body: '' });
+      }
+      let body = '';
+      response.on('data', (chunk) => { body += chunk; });
+      response.on('end', () => resolve({ statusCode: response.statusCode, headers: response.headers, body }));
+    }).on('error', reject);
+  });
+}
+
+async function discoverStreamUrl(streamName) {
+  const tvpassUrl = `https://tvpass.org/live/${streamName}/sd`;
+  const first = await httpsGetText(tvpassUrl);
+  return first.redirectedTo || tvpassUrl;
+}
+
+function encodeUrl(targetUrl) {
+  return Buffer.from(targetUrl).toString('base64url');
+}
+
+function decodeUrl(encoded) {
+  return Buffer.from(encoded, 'base64url').toString('utf8');
+}
+
+function proxiedUrl(req, targetUrl) {
+  return `https://${req.get('host')}/segment/${encodeUrl(targetUrl)}`;
+}
+
+app.get('/', (req, res) => {
+  res.json({ name: manifest.name, version: manifest.version, manifest: `https://${req.get('host')}/manifest.json` });
+});
 
 app.get('/manifest.json', (req, res) => res.json(manifest));
 
 app.get('/catalog/tv/thetvapp_channels.json', (req, res) => {
-  const metas = Object.keys(channelMap).map(id => ({
-    id: id,
+  const metas = Object.entries(channels).map(([id, channel]) => ({
+    id,
     type: 'tv',
-    name: id.replace('thetvapp_', '').toUpperCase().replace('EAST', ' Eastern'),
-    poster: `https://thetvapp.to/img/channels/${id.replace('thetvapp_', '')}.png`
+    name: channel.name,
+    poster: channel.poster,
+    logo: channel.poster,
+    description: `${channel.name} live TV channel`,
+    genres: ['Live TV']
   }));
   res.json({ metas });
 });
 
 app.get('/meta/tv/:id.json', (req, res) => {
-  const id = req.params.id;
+  const channel = channels[req.params.id];
+  if (!channel) return res.json({ meta: null });
   res.json({
     meta: {
-      id: id,
+      id: req.params.id,
       type: 'tv',
-      name: id.replace('thetvapp_', '').toUpperCase().replace('EAST', ' Eastern'),
-      poster: `https://thetvapp.to/img/channels/${id.replace('thetvapp_', '')}.png`
+      name: channel.name,
+      poster: channel.poster,
+      logo: channel.poster,
+      background: channel.poster,
+      description: `${channel.name} live TV channel`,
+      genres: ['Live TV'],
+      runtime: 'Live',
+      videos: [{ id: req.params.id, title: 'Live TV' }]
     }
   });
 });
 
 app.get('/stream/tv/:id.json', (req, res) => {
-  const id = req.params.id;
-  if (!channelMap[id]) return res.json({ streams: [] });
-  const host = req.get('host');
+  const channel = channels[req.params.id];
+  if (!channel) return res.json({ streams: [] });
   res.json({
     streams: [{
       name: 'Smart Relay',
-      title: 'No VPN Required',
-      url: `https://${host}/play/${id}/index.m3u8`
+      title: channel.name,
+      url: `https://${req.get('host')}/play/${req.params.id}/index.m3u8`,
+      behaviorHints: { notWebReady: false }
     }]
   });
 });
 
-function getFinalUrl(targetUrl) {
-  return new Promise((resolve, reject) => {
-    const options = {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Referer': 'https://thetvapp.to/'
-      }
-    };
-    https.get(targetUrl, options, (res) => {
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        resolve(res.headers.location);
-      } else {
-        resolve(targetUrl);
-      }
-    }).on('error', reject);
-  });
-}
-
 app.get('/play/:id/index.m3u8', async (req, res) => {
-  const id = req.params.id;
-  const channelId = channelMap[id];
-  if (!channelId) return res.status(404).send('Not Found');
+  const channel = channels[req.params.id];
+  if (!channel) return res.status(404).send('Not Found');
 
   try {
-    const tvpassUrl = `https://tvpass.org/live/${channelId}/sd`;
-    const realStreamUrl = await getFinalUrl(tvpassUrl);
-    
-    const options = {
-      headers: {
-        'Referer': 'https://thetvapp.to/',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      }
-    };
+    const realStreamUrl = await discoverStreamUrl(channel.streamName);
+    const playlist = await httpsGetText(realStreamUrl);
 
-    https.get(realStreamUrl, options, (proxyRes) => {
-      let data = '';
-      proxyRes.on('data', (chunk) => { data += chunk; });
-      proxyRes.on('end', () => {
-        const host = req.get('host');
-        const baseUrl = realStreamUrl.substring(0, realStreamUrl.lastIndexOf('/') + 1);
-        const encodedBase = Buffer.from(baseUrl).toString('base64');
-        
-        const rewrittenData = data.replace(/([a-zA-Z0-9_-]+\.ts)/g, `https://${host}/segment/${encodedBase}/$1`);
-        
-        res.set('Content-Type', 'application/vnd.apple.mpegurl');
-        res.send(rewrittenData);
-      });
-    }).on('error', (e) => res.status(500).send(e.message));
+    if (!playlist.body || !playlist.body.includes('#EXTM3U')) {
+      return res.status(502).type('text/plain').send('Could not load playlist');
+    }
 
+    const rewritten = playlist.body.split(/\r?\n/).map((line) => {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) return line;
+
+      const target = new URL(trimmed, realStreamUrl).href;
+      return proxiedUrl(req, target);
+    }).join('\n');
+
+    res.set('Content-Type', 'application/vnd.apple.mpegurl');
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.send(rewritten);
   } catch (error) {
-    res.status(500).send('Discovery Failed');
+    res.status(500).type('text/plain').send(`Discovery Failed: ${error.message}`);
   }
 });
 
-app.get('/segment/:base64/:file', (req, res) => {
-  const baseUrl = Buffer.from(req.params.base64, 'base64').toString();
-  const targetUrl = baseUrl + req.params.file;
-  
-  https.get(targetUrl, {
-    headers: {
-      'Referer': 'https://thetvapp.to/',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    }
-  }, (proxyRes) => {
-    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+app.get('/segment/:encoded', (req, res) => {
+  let targetUrl;
+  try {
+    targetUrl = decodeUrl(req.params.encoded);
+  } catch (error) {
+    return res.status(400).send('Bad segment URL');
+  }
+
+  https.get(targetUrl, { headers: headers() }, (proxyRes) => {
+    res.writeHead(proxyRes.statusCode || 200, {
+      ...proxyRes.headers,
+      'Access-Control-Allow-Origin': '*'
+    });
     proxyRes.pipe(res);
-  }).on('error', (e) => res.status(500).send(e.message));
+  }).on('error', (error) => res.status(500).send(error.message));
 });
 
-app.listen(PORT, () => console.log(`Smart Proxy v1.1.6 live on ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Smart Proxy v1.1.7 live on ${PORT}`));
