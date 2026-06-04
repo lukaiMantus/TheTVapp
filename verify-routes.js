@@ -14,13 +14,13 @@ const routes = [
 ];
 
 async function getJson(route) {
-  const url = \`\${BASE_URL}\${route}\`;
+  const url = `${BASE_URL}${route}`;
   const response = await fetch(url, { headers: { accept: 'application/json' } });
   const contentType = response.headers.get('content-type') || '';
-  assert(response.ok, \`\${route} returned HTTP \${response.status}\`);
-  assert(contentType.includes('application/json'), \`\${route} returned non-JSON content type: \${contentType}\`);
+  assert(response.ok, `${route} returned HTTP ${response.status}`);
+  assert(contentType.includes('application/json'), `${route} returned non-JSON content type: ${contentType}`);
   const json = await response.json();
-  console.log(\`OK \${route}\`);
+  console.log(`OK ${route}`);
   return json;
 }
 
@@ -46,8 +46,8 @@ async function getJson(route) {
   const tlcStream = await getJson('/stream/tv/thetvapp_tlceast.json');
   assert(tlcStream.streams.length > 0, 'TLC stream route should contain a stream');
 
-  console.log('\\nAll required Stremio protocol routes (Live TV + Torrentio) returned JSON successfully.');
+  console.log('\nAll required Stremio protocol routes (Live TV + Torrentio) returned JSON successfully.');
 })().catch((err) => {
-  console.error(\`Verification failed: \${err.message}\`);
+  console.error(`Verification failed: ${err.message}`);
   process.exit(1);
 });
