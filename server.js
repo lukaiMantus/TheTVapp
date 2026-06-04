@@ -243,7 +243,7 @@ function renderWatchPage(req) {
 
   const channelData = JSON.stringify(channels).replace(/</g, '\\u003c');
 
-  return \`<!doctype html>
+  return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -409,7 +409,7 @@ function renderWatchPage(req) {
     render();
   </script>
 </body>
-</html>\`;
+</html>`;
 }
 
 app.get('/', (req, res) => {
@@ -417,8 +417,8 @@ app.get('/', (req, res) => {
     name: manifest.name,
     version: manifest.version,
     channelCount: getChannels().length,
-    webPlayer: \`\${absoluteBaseUrl(req)}/watch\`,
-    manifest: \`\${absoluteBaseUrl(req)}/manifest.json\`
+    webPlayer: `${absoluteBaseUrl(req)}/watch`,
+    manifest: `${absoluteBaseUrl(req)}/manifest.json`
   });
 });
 
@@ -435,7 +435,7 @@ app.get('/channels.json', (req, res) => {
     name: channel.name,
     poster: channel.poster,
     genres: channel.genres || ['Live TV'],
-    playUrl: \`\${absoluteBaseUrl(req)}/play/\${channel.id}/index.m3u8\`
+    playUrl: `${absoluteBaseUrl(req)}/play/${channel.id}/index.m3u8`
   })) });
 });
 
@@ -501,7 +501,7 @@ app.get('/stream/tv/:id.json', (req, res) => {
     streams: [{
       name: 'Smart Relay',
       title: channel.name,
-      url: \`\${absoluteBaseUrl(req)}/play/\${channel.id}/index.m3u8\`,
+      url: `${absoluteBaseUrl(req)}/play/${channel.id}/index.m3u8`,
       behaviorHints: { notWebReady: false }
     }]
   });
@@ -539,18 +539,18 @@ app.get('/play/:id/index.m3u8', async (req, res) => {
       return res.status(502).type('text/plain').send('Could not load playlist');
     }
 
-    const rewritten = playlist.body.split(/\\r?\\n/).map((line) => {
+    const rewritten = playlist.body.split(/\r?\n/).map((line) => {
       const trimmed = line.trim();
       if (!trimmed || trimmed.startsWith('#')) return line;
       const target = new URL(trimmed, realStreamUrl).href;
       return proxiedUrl(req, target);
-    }).join('\\n');
+    }).join('\n');
 
     res.set('Content-Type', 'application/vnd.apple.mpegurl');
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.send(rewritten);
   } catch (error) {
-    res.status(500).type('text/plain').send(\`Discovery Failed: \${error.message}\`);
+    res.status(500).type('text/plain').send(`Discovery Failed: ${error.message}`);
   }
 });
 
@@ -573,6 +573,6 @@ app.get('/segment/:encoded', (req, res) => {
 
 loadChannels();
 
-app.listen(PORT, '0.0.0.0', () => console.log(\`TheTVApp v\${manifest.version} live on \${PORT}\`));
+app.listen(PORT, '0.0.0.0', () => console.log(`TheTVApp v${manifest.version} live on ${PORT}`));
 
 module.exports = app;
