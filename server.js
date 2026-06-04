@@ -1,275 +1,139 @@
 'use strict';
-const express = require('express');
-const cors = require('cors');
-const https = require('https');
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const WebTorrent = require('webtorrent');
-
-const app = express();
-const PORT = process.env.PORT || 7000;
-const torrentClient = new WebTorrent();
-
+const express = require('express'), cors = require('cors'), https = require('https'), http = require('http'), fs = require('fs'), path = require('path'), WebTorrent = require('webtorrent');
+const app = express(), PORT = process.env.PORT || 7000, torrentClient = new WebTorrent();
 app.use(cors());
 
 const manifest = {
-  id: 'org.stremio.thetvapp',
-  version: '1.9.0',
-  name: 'TheTVApp (Universal Fix)',
-  description: 'Watch live TV and movies on any device',
-  resources: ['catalog', 'meta', 'stream'],
-  types: ['tv', 'movie', 'series'],
+  id: 'org.stremio.thetvapp', version: '2.0.0', name: 'TheTVApp (Master Version)',
+  description: 'Original Live TV + Torrentio Movies & Series',
+  resources: ['catalog', 'meta', 'stream'], types: ['tv', 'movie', 'series'],
   catalogs: [
     { type: 'tv', id: 'thetvapp_channels', name: 'Live TV Channels' },
-    { type: 'movie', id: 'torrentio_movies', name: 'Popular Movies', extra: [{ name: 'search' }] },
-    { type: 'series', id: 'torrentio_series', name: 'Popular Series', extra: [{ name: 'search' }] }
-  ],
-  idPrefixes: ['thetvapp_', 'tt']
+    { type: 'movie', id: 'torrentio_movies', name: 'Movies', extra: [{ name: 'search' }] },
+    { type: 'series', id: 'torrentio_series', name: 'Series', extra: [{ name: 'search' }] }
+  ], idPrefixes: ['thetvapp_', 'tt']
 };
 
 let cachedChannels = [];
-
 function loadChannels() {
   const paths = [path.join(__dirname, 'channels.json'), path.join(process.cwd(), 'channels.json')];
-  for (const filePath of paths) {
-    try {
-      if (fs.existsSync(filePath)) {
-        const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        if (Array.isArray(parsed)) {
-          cachedChannels = parsed.map(c => ({
-            id: c.id, type: 'tv', name: c.name, poster: c.poster || c.logo, url: c.url, genres: ['Live TV']
-          }));
-          return cachedChannels;
-        }
-      }
-    } catch (e) {}
-  }
+  for (const p of paths) { if (fs.existsSync(p)) { 
+    const d = JSON.parse(fs.readFileSync(p, 'utf8'));
+    if (Array.isArray(d)) return cachedChannels = d.map(c => ({ id: c.id, type: 'tv', name: c.name, poster: c.poster || c.logo, url: c.url }));
+  }}
   return [];
 }
-
-function headers() {
-  return { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', 'Referer': 'https://thetvapp.to/', 'Accept': '*/*' };
-}
-
-function httpsGetText(url) {
-  return new Promise((resolve, reject) => {
-    https.get(url, { headers: headers() }, (res) => {
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) return resolve({ redirectedTo: res.headers.location, body: '' });
-      let body = '';
-      res.on('data', (chunk) => body += chunk);
-      res.on('end', () => resolve({ body }));
-    }).on('error', reject);
-  });
-}
-
-function httpGetJson(url) {
-  return new Promise((resolve, reject) => {
-    const protocol = url.startsWith('https') ? https : http;
-    protocol.get(url, (res) => {
-      let data = '';
-      res.on('data', (chunk) => data += chunk);
-      res.on('end', () => { try { resolve(JSON.parse(data)); } catch (e) { reject(e); } });
-    }).on('error', reject);
-  });
-}
-
-async function discoverStreamUrl(channel) {
-  const streamName = (channel.url || '').match(/\/hls\/([^/]+)\//i)?.[1] || channel.id.replace(/^thetvapp_/, '');
-  const tvpassUrl = `https://tvpass.org/live/${encodeURIComponent(streamName)}/sd`;
-  const first = await httpsGetText(tvpassUrl);
-  return first.redirectedTo || tvpassUrl;
+function headers() { return { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', 'Referer': 'https://thetvapp.to/', 'Accept': '*/*' }; }
+function httpsGetText(url) { return new Promise((res, rej) => { https.get(url, { headers: headers() }, (r) => {
+  if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) return res({ redirectedTo: r.headers.location });
+  let b = ''; r.on('data', d => b += d); r.on('end', () => res({ body: b }));
+}).on('error', rej); }); }
+async function discoverStreamUrl(c) {
+  const s = (c.url || '').match(/\/hls\/([^/]+)\//i)?.[1] || c.id.replace(/^thetvapp_/, '');
+  const r = await httpsGetText(\`https://tvpass.org/live/\${encodeURIComponent(s)}/sd\`);
+  return r.redirectedTo || \`https://tvpass.org/live/\${encodeURIComponent(s)}/sd\`;
 }
 
 app.get('/', (req, res) => res.redirect('/watch'));
 app.get('/manifest.json', (req, res) => res.json(manifest));
-
 app.get('/search/:type', async (req, res) => {
-  const query = req.query.q || '';
-  try {
-    const url = `https://v3-cinemeta.strem.io/catalog/${req.params.type}/top/${query ? 'search=' + encodeURIComponent(query) : ''}.json`;
-    const data = await httpGetJson(url);
-    res.json(data.metas || []);
-  } catch (e) { res.json([]); }
+  try { const r = await new Promise(resolve => http.get(\`https://v3-cinemeta.strem.io/catalog/\${req.params.type}/top/search=\${encodeURIComponent(req.query.q || '')}.json\`, res => {
+    let d = ''; res.on('data', c => d += c); res.on('end', () => resolve(JSON.parse(d)));
+  })); res.json(r.metas || []); } catch (e) { res.json([]); }
 });
-
 app.get('/streams/:type/:id', async (req, res) => {
-  try {
-    const url = `https://torrentio.strem.fun/stream/${req.params.type}/${req.params.id}.json`;
-    const data = await httpGetJson(url);
-    res.json(data.streams || []);
-  } catch (e) { res.json([]); }
+  try { const r = await new Promise(resolve => https.get(\`https://torrentio.strem.fun/stream/\${req.params.type}/\${req.params.id}.json\`, res => {
+    let d = ''; res.on('data', c => d += c); res.on('end', () => resolve(JSON.parse(d)));
+  })); res.json(r.streams || []); } catch (e) { res.json([]); }
 });
-
-app.get('/stream-torrent/:infoHash', (req, res) => {
-  const torrent = torrentClient.get(req.params.infoHash);
-  const handle = (t) => {
-    const file = t.files.find(f => f.name.endsWith('.mp4') || f.name.endsWith('.mkv') || f.name.endsWith('.avi'));
-    if (!file) return res.status(404).send('No video file');
-    const range = req.headers.range;
-    if (!range) {
-      res.writeHead(200, { 'Content-Length': file.length, 'Content-Type': 'video/mp4' });
-      file.createReadStream().pipe(res);
-    } else {
-      const parts = range.replace(/bytes=/, "").split("-");
-      const start = parseInt(parts[0], 10);
-      const end = parts[1] ? parseInt(parts[1], 10) : file.length - 1;
-      res.writeHead(206, { 'Content-Range': `bytes ${start}-${end}/${file.length}`, 'Accept-Ranges': 'bytes', 'Content-Length': (end - start) + 1, 'Content-Type': 'video/mp4' });
-      file.createReadStream({ start, end }).pipe(res);
+app.get('/stream-torrent/:hash', (req, res) => {
+  const t = torrentClient.get(req.params.hash) || torrentClient.add(req.params.hash, t => {
+    const f = t.files.find(f => f.name.match(/\\.(mp4|mkv|avi)$/i));
+    if (!f) return res.status(404).send('No video');
+    const r = req.headers.range;
+    if (!r) { res.writeHead(200, { 'Content-Length': f.length, 'Content-Type': 'video/mp4' }); f.createReadStream().pipe(res); }
+    else {
+      const p = r.replace(/bytes=/, "").split("-"), s = parseInt(p[0], 10), e = p[1] ? parseInt(p[1], 10) : f.length - 1;
+      res.writeHead(206, { 'Content-Range': \`bytes \${s}-\${e}/\${f.length}\`, 'Accept-Ranges': 'bytes', 'Content-Length': (e - s) + 1, 'Content-Type': 'video/mp4' });
+      f.createReadStream({ start: s, end: e }).pipe(res);
     }
-  };
-  if (torrent) handle(torrent); else torrentClient.add(req.params.infoHash, handle);
+  });
 });
-
 app.get('/play/:id/index.m3u8', async (req, res) => {
-  const channel = loadChannels().find(c => c.id === req.params.id);
-  if (!channel) return res.status(404).send('Not Found');
+  const c = loadChannels().find(c => c.id === req.params.id);
+  if (!c) return res.status(404).send('Not Found');
   try {
-    const realUrl = await discoverStreamUrl(channel);
-    const playlist = await httpsGetText(realUrl);
-    const rewritten = playlist.body.split(/\r?\n/).map(line => {
-      if (!line.trim() || line.startsWith('#')) return line;
-      const target = new URL(line.trim(), realUrl).href;
-      return `${req.protocol}://${req.get('host')}/segment/${Buffer.from(target).toString('base64url')}`;
-    }).join('\n');
-    res.set('Content-Type', 'application/vnd.apple.mpegurl').send(rewritten);
+    const u = await discoverStreamUrl(c), p = await httpsGetText(u);
+    const r = p.body.split(/\\r?\\n/).map(l => {
+      if (!l.trim() || l.startsWith('#')) return l;
+      const t = new URL(l.trim(), u).href;
+      return \`\${req.protocol}://\${req.get('host')}/segment/\${Buffer.from(t).toString('base64url')}\`;
+    }).join('\\n');
+    res.set('Content-Type', 'application/vnd.apple.mpegurl').send(r);
   } catch (e) { res.status(500).send(e.message); }
 });
-
-app.get('/segment/:encoded', (req, res) => {
-  https.get(Buffer.from(req.params.encoded, 'base64url').toString('utf8'), { headers: headers() }, (pRes) => {
-    res.writeHead(pRes.statusCode || 200, { ...pRes.headers, 'Access-Control-Allow-Origin': '*' });
-    pRes.pipe(res);
+app.get('/segment/:e', (req, res) => {
+  https.get(Buffer.from(req.params.e, 'base64url').toString('utf8'), { headers: headers() }, (pr) => {
+    res.writeHead(pr.statusCode || 200, { ...pr.headers, 'Access-Control-Allow-Origin': '*' }); pr.pipe(res);
   });
 });
-
 app.get('/img-proxy', (req, res) => {
-  const url = req.query.url;
-  if (!url) return res.status(400).send('Missing URL');
-  https.get(url, { headers: headers() }, (pRes) => {
-    res.writeHead(pRes.statusCode || 200, { 'Content-Type': pRes.headers['content-type'], 'Cache-Control': 'public, max-age=86400' });
-    pRes.pipe(res);
+  https.get(req.query.url, { headers: headers() }, (pr) => {
+    res.writeHead(pr.statusCode || 200, { 'Content-Type': pr.headers['content-type'] }); pr.pipe(res);
   });
 });
-
 app.get('/watch', (req, res) => {
-  const channels = JSON.stringify(loadChannels());
-  res.send(`<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TheTVApp Web Player</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <style>
-        :root { --bg: #0f172a; --card: #1e293b; --accent: #22c55e; --text: #f8fafc; }
-        body { margin: 0; font-family: sans-serif; background: var(--bg); color: var(--text); }
-        header { padding: 20px; background: #000; position: sticky; top: 0; z-index: 100; }
-        .tabs { display: flex; gap: 20px; margin-bottom: 15px; }
-        .tab { cursor: pointer; padding: 10px; border-bottom: 2px solid transparent; opacity: 0.6; }
-        .tab.active { border-color: var(--accent); opacity: 1; }
-        input { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--card); color: #fff; box-sizing: border-box; }
-        main { display: grid; grid-template-columns: 1fr 350px; gap: 20px; padding: 20px; }
-        @media (max-width: 800px) { main { grid-template-columns: 1fr; } .sidebar { order: -1; } }
-        .player-container { background: #000; border-radius: 12px; overflow: hidden; position: sticky; top: 120px; }
-        video { width: 100%; aspect-ratio: 16/9; background: #000; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-        .card { background: var(--card); border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.2s; text-align: left; border: none; width: 100%; color: inherit; padding: 0; }
-        .card:hover { transform: scale(1.05); }
-        .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; background: #000; }
-        .card-info { padding: 10px; font-size: 14px; }
-        .stream-list { padding: 15px; background: var(--card); border-radius: 12px; margin-top: 20px; }
-        .stream-item { padding: 10px; margin-bottom: 8px; background: #334155; border-radius: 6px; cursor: pointer; font-size: 13px; }
-        .stream-item:hover { background: #475569; }
-        .status { font-size: 12px; color: var(--accent); margin-top: 5px; }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="tabs">
-            <div class="tab active" onclick="setTab('live')">Live TV</div>
-            <div class="tab" onclick="setTab('movie')">Movies</div>
-            <div class="tab" onclick="setTab('series')">Series</div>
-        </div>
-        <input type="text" id="search" placeholder="Search..." oninput="handleSearch()">
-    </header>
-    <main>
-        <div class="content"><div id="grid" class="grid"></div></div>
-        <div class="sidebar">
-            <div class="player-container">
-                <video id="video" controls autoplay></video>
-                <div style="padding:15px"><h3 id="playing-title">Select something</h3><div id="video-status" class="status"></div></div>
-            </div>
-            <div id="streams" class="stream-list" style="display:none"><h4>Select Quality</h4><div id="stream-items"></div></div>
-        </div>
-    </main>
-    <script>
-        const channels = ${channels};
-        let currentTab = 'live', hls = null, searchTimeout;
-        function setTab(tab) {
-            currentTab = tab;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById('search').value = '';
-            handleSearch();
-        }
-        async function handleSearch() {
-            const query = document.getElementById('search').value.toLowerCase();
-            const grid = document.getElementById('grid');
-            if (currentTab === 'live') {
-                renderGrid(channels.filter(c => c.name.toLowerCase().includes(query)));
-            } else {
-                grid.innerHTML = 'Loading...';
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(async () => {
-                    const res = await fetch(\`/search/\${currentTab}?q=\${query}\`);
-                    renderGrid(await res.json());
-                }, 500);
-            }
-        }
-        function renderGrid(items) {
-            document.getElementById('grid').innerHTML = items.map(item => {
-                const poster = item.poster || 'https://via.placeholder.com/150x225?text=No+Poster';
-                const proxiedPoster = poster.includes('thetvapp.to') ? \`/img-proxy?url=\${encodeURIComponent(poster)}\` : poster;
-                return \`<button class="card" onclick="selectItem('\${item.id}', '\${item.type || currentTab}', '\${item.name.replace(/'/g, "\\\\'")}')">
-                    <img src="\${proxiedPoster}" onerror="this.src='https://via.placeholder.com/150x225?text=No+Poster'">
-                    <div class="card-info"><strong>\${item.name}</strong></div>
-                </button>\`;
-            }).join('');
-        }
-        async function selectItem(id, type, name) {
-            document.getElementById('playing-title').innerText = name;
-            document.getElementById('streams').style.display = 'none';
-            document.getElementById('video-status').innerText = '';
-            if (type === 'tv' || currentTab === 'live') {
-                playStream(\`\${window.location.origin}/play/\${id}/index.m3u8\`);
-            } else {
-                document.getElementById('stream-items').innerHTML = 'Searching...';
-                document.getElementById('streams').style.display = 'block';
-                const res = await fetch(\`/streams/\${type}/\${id}\`);
-                const streams = await res.json();
-                document.getElementById('stream-items').innerHTML = streams.map(s => \`
-                    <div class="stream-item" onclick="playStream('\${s.infoHash ? window.location.origin + '/stream-torrent/' + s.infoHash : s.url}')">
-                        \${s.title}
-                    </div>\`).join('');
-            }
-        }
-        function playStream(url) {
-            const video = document.getElementById('video'), status = document.getElementById('video-status');
-            status.innerText = url.includes('stream-torrent') ? 'Connecting...' : 'Playing...';
-            if (hls) { hls.destroy(); hls = null; }
-            if (url.endsWith('.m3u8')) {
-                if (Hls.isSupported()) {
-                    hls = new Hls(); hls.loadSource(url); hls.attachMedia(video);
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                    video.src = url; video.play();
-                }
-            } else { video.src = url; video.play().catch(e => { status.innerText = 'Playback error.'; }); }
-        }
-        handleSearch();
-    </script>
-</body>
-</html>`);
+  const ch = JSON.stringify(loadChannels());
+  res.send(\`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>TheTVApp</title><script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script><style>
+  :root { --bg: #0f172a; --card: #1e293b; --accent: #22c55e; --text: #f8fafc; }
+  body { margin: 0; font-family: sans-serif; background: var(--bg); color: var(--text); }
+  header { padding: 15px; background: #000; position: sticky; top: 0; z-index: 100; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; }
+  .tabs { display: flex; gap: 15px; } .tab { cursor: pointer; opacity: 0.6; padding: 5px; } .tab.active { border-bottom: 2px solid var(--accent); opacity: 1; }
+  input { flex: 1; min-width: 200px; padding: 10px; border-radius: 8px; border: none; background: var(--card); color: #fff; }
+  main { display: grid; grid-template-columns: 1fr 350px; gap: 20px; padding: 15px; }
+  @media (max-width: 800px) { main { grid-template-columns: 1fr; } .sidebar { order: -1; } }
+  video { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+  .card { background: var(--card); border-radius: 10px; overflow: hidden; cursor: pointer; border: none; color: inherit; padding: 0; text-align: left; }
+  .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; } .card-info { padding: 8px; font-size: 12px; }
+  .stream-item { padding: 10px; margin-top: 5px; background: #334155; border-radius: 6px; cursor: pointer; font-size: 12px; }
+  </style></head><body><header><div class="tabs"><div class="tab active" onclick="setTab('live')">Live TV</div><div class="tab" onclick="setTab('movie')">Movies</div><div class="tab" onclick="setTab('series')">Series</div></div><input type="text" id="search" placeholder="Search..." oninput="handleSearch()"></header>
+  <main><div id="grid" class="grid"></div><div class="sidebar"><video id="video" controls autoplay playsinline></video><h3 id="title">Select something</h3><div id="status" style="color:var(--accent);font-size:12px"></div><div id="streams" style="display:none;margin-top:15px"><h4>Streams</h4><div id="items"></div></div></div></main>
+  <script>
+    let currentTab = 'live', hls = null, searchTimeout; const channels = \${ch};
+    function setTab(t) { currentTab = t; document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.innerText.toLowerCase().includes(t))); handleSearch(); }
+    async function handleSearch() {
+      const q = document.getElementById('search').value.toLowerCase(); const g = document.getElementById('grid');
+      if (currentTab === 'live') render(channels.filter(c => c.name.toLowerCase().includes(q)));
+      else { g.innerHTML = 'Loading...'; clearTimeout(searchTimeout); searchTimeout = setTimeout(async () => {
+        const r = await fetch(\`/search/\${currentTab}?q=\${q}\`); render(await r.json());
+      }, 500); }
+    }
+    function render(items) {
+      document.getElementById('grid').innerHTML = items.map(i => {
+        const p = i.poster || 'https://via.placeholder.com/150x225?text=No+Poster';
+        const src = p.includes('thetvapp.to') ? \`/img-proxy?url=\${encodeURIComponent(p)}\` : p;
+        return \`<button class="card" onclick="select('\${i.id}', '\${i.type || currentTab}', '\${i.name.replace(/'/g, "\\\\'")}')"><img src="\${src}"><div class="card-info"><strong>\${i.name}</strong></div></button>\`;
+      }).join('');
+    }
+    async function select(id, type, name) {
+      document.getElementById('title').innerText = name; document.getElementById('streams').style.display = 'none';
+      if (type === 'tv' || currentTab === 'live') play(\`\${window.location.origin}/play/\${id}/index.m3u8\`);
+      else {
+        document.getElementById('items').innerHTML = 'Searching...'; document.getElementById('streams').style.display = 'block';
+        const r = await fetch(\`/streams/\${type}/\${id}\`), s = await r.json();
+        document.getElementById('items').innerHTML = s.map(x => \`<div class="stream-item" onclick="play('\${x.infoHash ? window.location.origin + '/stream-torrent/' + x.infoHash : x.url}')">\${x.title}</div>\`).join('');
+      }
+    }
+    function play(u) {
+      const v = document.getElementById('video'), s = document.getElementById('status');
+      s.innerText = u.includes('torrent') ? 'Connecting...' : 'Playing...'; if (hls) hls.destroy();
+      if (u.endsWith('.m3u8')) {
+        if (Hls.isSupported()) { hls = new Hls(); hls.loadSource(u); hls.attachMedia(v); hls.on(Hls.Events.MANIFEST_PARSED, () => v.play()); }
+        else if (v.canPlayType('application/vnd.apple.mpegurl')) { v.src = u; v.play(); }
+      } else { v.src = u; v.play().catch(e => s.innerText = 'Error playing.'); }
+    }
+    handleSearch();
+  </script></body></html>\`);
 });
-app.listen(PORT, () => console.log(\`TheTVApp v1.9.0 live on \${PORT}\`));
+app.listen(PORT, () => console.log(\`TheTVApp v2.0.0 live on \${PORT}\`));
