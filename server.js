@@ -114,31 +114,40 @@ app.get('/api/youtube/search', async (req, res) => {
   if (!q) return res.json([]);
   
   try {
-    const { execa } = await import('execa');
-    // Using yt-dlp to search as it is more reliable than scraping in some environments
-    const { stdout } = await execa('yt-dlp', [
-      'ytsearch10:' + q,
-      '--dump-json',
-      '--flat-playlist'
-    ]);
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9'
+      }
+    });
+
+    const html = response.data;
+    const jsonStr = html.split('var ytInitialData = ')[1]?.split(';</script>')[0];
     
-    const lines = stdout.trim().split('\n');
-    const results = lines.map(line => {
-      try {
-        const j = JSON.parse(line);
-        return {
-          id: j.id,
-          title: j.title,
-          thumbnail: j.thumbnails ? j.thumbnails[0].url : `https://i.ytimg.com/vi/${j.id}/hqdefault.jpg`,
-          author: j.uploader || 'YouTube'
-        };
-      } catch(e) { return null; }
-    }).filter(Boolean);
+    if (!jsonStr) return res.json([]);
+
+    const data = JSON.parse(jsonStr);
+    const results = [];
+    const contents = data.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0].itemSectionRenderer.contents;
+    
+    for (const item of contents) {
+      if (item.videoRenderer) {
+        const v = item.videoRenderer;
+        results.push({
+          id: v.videoId,
+          title: v.title.runs[0].text,
+          thumbnail: v.thumbnail.thumbnails[0].url,
+          author: v.ownerText.runs[0].text
+        });
+      }
+      if (results.length >= 10) break;
+    }
     
     res.json(results);
   } catch (error) {
     console.error('YouTube Search Error:', error.message);
-    res.status(500).json({ error: error.message });
+    res.status(500).json([]);
   }
 });
 loadChannels();
@@ -238,7 +247,7 @@ function renderWatchPage(req) {
   <meta name="apple-mobile-web-app-title" content="TheTVApp">
   <title>TheTVApp Web Player</title>
   <style>
-    :root { color-scheme: dark; --bg: #070b14; --panel: #101827; --panel2: #162033; --text: #f8fafc; --muted: #9ca3af; --accent: #22c55e; --border: #263246; --yt: #ff0000; }
+    :root { color-scheme: dark; --bg: #070b14; --panel: #101827; --panel2: #162033; --text: #f8fafc; --muted: #9ca3af; --accent: #22c5e; --border: #263246; --yt: #ff0000; }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: radial-gradient(circle at top, #16233b 0%, var(--bg) 48%, #03050a 100%); color: var(--text); min-height: 100vh; }
     header { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(18px); background: rgba(7, 11, 20, 0.88); border-bottom: 1px solid var(--border); padding: 14px 16px; }
@@ -462,33 +471,15 @@ function renderWatchPage(req) {
 }
 
 app.get('/', (req, res) => {
-  res.json({
-    name: manifest.name,
-    version: manifest.version,
-    channelCount: getChannels().length,
-    webPlayer: `${absoluteBaseUrl(req)}/watch`,
-    manifest: `${absoluteBaseUrl(req)}/manifest.json`
-  });
-});
-
-app.get('/watch', (req, res) => {
-  res.set('Content-Type', 'text/html; charset=utf-8');
-  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.send(renderWatchPage(req));
 });
 
-app.get('/channels.json', (req, res) => {
-  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-  res.json({ channels: getChannels().map((channel) => ({
-    id: channel.id,
-    name: channel.name,
-    poster: channel.poster,
-    genres: channel.genres || ['Live TV'],
-    playUrl: `${absoluteBaseUrl(req)}/play/${channel.id}/index.m3u8`
-  })) });
+app.get('/manifest.json', (req, res) => {
+  manifest.id = `org.stremio.thetvapp.${req.get('host').replace(/[^a-zA-Z0-9]/g, '')}`;
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.json(manifest);
 });
-
-app.get('/manifest.json', (req, res) => res.json(manifest));
 
 app.get('/catalog/tv/thetvapp_channels.json', (req, res) => {
   const metas = getChannels().map(channelSummary);
