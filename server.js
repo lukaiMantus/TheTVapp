@@ -15,8 +15,8 @@ app.use(cors());
 
 const manifest = {
   id: 'org.stremio.thetvapp',
-  version: '1.6.0',
-  name: 'TheTVApp (No-VPN + Torrent Streaming)',
+  version: '1.7.0',
+  name: 'TheTVApp (Full Support)',
   description: 'Watch live TV and movies directly in your browser',
   resources: ['catalog', 'meta', 'stream'],
   types: ['tv', 'movie', 'series'],
@@ -146,10 +146,7 @@ app.get('/segment/:encoded', (req, res) => {
   https.get(Buffer.from(req.params.encoded, 'base64url').toString('utf8'), { headers: headers() }, (pRes) => {
     res.writeHead(pRes.statusCode || 200, { ...pRes.headers, 'Access-Control-Allow-Origin': '*' });
     pRes.pipe(res);
-  });
-});
-
-app.get('/watch', (req, res) => {
+  });app.get('/watch', (req, res) => {
   const channels = JSON.stringify(loadChannels());
   res.send(`<!DOCTYPE html>
 <html lang="en">
@@ -272,4 +269,6 @@ app.get('/watch', (req, res) => {
 </html>`);
 });
 
-app.listen(PORT, () => console.log(`TheTVApp v1.6.0 live on ${PORT}`));
+app.listen(PORT, () => console.log(`TheTVApp v1.7.0 live on ${PORT}`));
+
+});
