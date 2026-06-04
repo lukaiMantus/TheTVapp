@@ -15,9 +15,9 @@ app.use(cors());
 
 const manifest = {
   id: 'org.stremio.thetvapp',
-  version: '1.7.0',
-  name: 'TheTVApp (Full Support)',
-  description: 'Watch live TV and movies directly in your browser',
+  version: '1.8.0',
+  name: 'TheTVApp (Universal Support)',
+  description: 'Watch live TV and movies on any device',
   resources: ['catalog', 'meta', 'stream'],
   types: ['tv', 'movie', 'series'],
   catalogs: [
@@ -146,7 +146,17 @@ app.get('/segment/:encoded', (req, res) => {
   https.get(Buffer.from(req.params.encoded, 'base64url').toString('utf8'), { headers: headers() }, (pRes) => {
     res.writeHead(pRes.statusCode || 200, { ...pRes.headers, 'Access-Control-Allow-Origin': '*' });
     pRes.pipe(res);
-  });app.get('/watch', (req, res) => {
+  });
+});
+
+app.get('/img-proxy', (req, res) => {
+  const url = req.query.url;
+  if (!url) return res.status(400).send('Missing URL');
+  https.get(url, { headers: headers() }, (pRes) => {
+    res.writeHead(pRes.statusCode || 200, { 'Content-Type': pRes.headers['content-type'], 'Cache-Control': 'public, max-age=86400' });
+    pRes.pipe(res);
+  });
+});app.get('/watch', (req, res) => {
   const channels = JSON.stringify(loadChannels());
   res.send(`<!DOCTYPE html>
 <html lang="en">
@@ -154,6 +164,7 @@ app.get('/segment/:encoded', (req, res) => {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TheTVApp Web Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #22c55e; --text: #f8fafc; }
         body { margin: 0; font-family: sans-serif; background: var(--bg); color: var(--text); }
@@ -207,7 +218,9 @@ app.get('/segment/:encoded', (req, res) => {
     <script>
         const channels = ${channels};
         let currentTab = 'live';
+        let hls = null;
         let searchTimeout;
+
         function setTab(tab) {
             currentTab = tab;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -215,6 +228,7 @@ app.get('/segment/:encoded', (req, res) => {
             document.getElementById('search').value = '';
             handleSearch();
         }
+
         async function handleSearch() {
             const query = document.getElementById('search').value.toLowerCase();
             const grid = document.getElementById('grid');
@@ -229,15 +243,20 @@ app.get('/segment/:encoded', (req, res) => {
                 }, 500);
             }
         }
+
         function renderGrid(items) {
             const grid = document.getElementById('grid');
-            grid.innerHTML = items.map(item => \`
+            grid.innerHTML = items.map(item => {
+                const poster = item.poster || 'https://via.placeholder.com/150x225?text=No+Poster';
+                const proxiedPoster = poster.includes('thetvapp.to') ? \`/img-proxy?url=\${encodeURIComponent(poster)}\` : poster;
+                return \`
                 <button class="card" onclick="selectItem('\${item.id}', '\${item.type || currentTab}', '\${item.name.replace(/'/g, "\\\\'")}')">
-                    <img src="\${item.poster || 'https://via.placeholder.com/150x225?text=No+Poster'}" onerror="this.src='https://via.placeholder.com/150x225?text=No+Poster'">
+                    <img src="\${proxiedPoster}" onerror="this.src='https://via.placeholder.com/150x225?text=No+Poster'">
                     <div class="card-info"><strong>\${item.name}</strong></div>
-                </button>
-            \`).join('');
+                </button>\`;
+            }).join('');
         }
+
         async function selectItem(id, type, name) {
             document.getElementById('playing-title').innerText = name;
             document.getElementById('streams').style.display = 'none';
@@ -256,12 +275,28 @@ app.get('/segment/:encoded', (req, res) => {
                 \`).join('');
             }
         }
+
         function playStream(url) {
             const video = document.getElementById('video');
             const status = document.getElementById('video-status');
             status.innerText = url.includes('stream-torrent') ? 'Connecting to peers...' : 'Playing...';
-            video.src = url;
-            video.play().catch(e => { status.innerText = 'Playback error. Try another stream.'; });
+
+            if (hls) { hls.destroy(); hls = null; }
+
+            if (url.endsWith('.m3u8')) {
+                if (Hls.isSupported()) {
+                    hls = new Hls();
+                    hls.loadSource(url);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.src = url;
+                    video.play();
+                }
+            } else {
+                video.src = url;
+                video.play().catch(e => { status.innerText = 'Playback error. Try another stream.'; });
+            }
         }
         handleSearch();
     </script>
@@ -269,6 +304,5 @@ app.get('/segment/:encoded', (req, res) => {
 </html>`);
 });
 
-app.listen(PORT, () => console.log(`TheTVApp v1.7.0 live on ${PORT}`));
-
+app.listen(PORT, () => console.log(`TheTVApp v1.8.0 live on ${PORT}`));
 
