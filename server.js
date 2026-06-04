@@ -15,8 +15,8 @@ app.use(cors());
 
 const manifest = {
   id: 'org.stremio.thetvapp',
-  version: '1.8.0',
-  name: 'TheTVApp (Universal Support)',
+  version: '1.9.0',
+  name: 'TheTVApp (Universal Fix)',
   description: 'Watch live TV and movies on any device',
   resources: ['catalog', 'meta', 'stream'],
   types: ['tv', 'movie', 'series'],
@@ -49,19 +49,13 @@ function loadChannels() {
 }
 
 function headers() {
-  return {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Referer': 'https://thetvapp.to/',
-    'Accept': '*/*'
-  };
+  return { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', 'Referer': 'https://thetvapp.to/', 'Accept': '*/*' };
 }
 
 function httpsGetText(url) {
   return new Promise((resolve, reject) => {
     https.get(url, { headers: headers() }, (res) => {
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return resolve({ redirectedTo: res.headers.location, body: '' });
-      }
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) return resolve({ redirectedTo: res.headers.location, body: '' });
       let body = '';
       res.on('data', (chunk) => body += chunk);
       res.on('end', () => resolve({ body }));
@@ -156,7 +150,9 @@ app.get('/img-proxy', (req, res) => {
     res.writeHead(pRes.statusCode || 200, { 'Content-Type': pRes.headers['content-type'], 'Cache-Control': 'public, max-age=86400' });
     pRes.pipe(res);
   });
-});app.get('/watch', (req, res) => {
+});
+
+app.get('/watch', (req, res) => {
   const channels = JSON.stringify(loadChannels());
   res.send(`<!DOCTYPE html>
 <html lang="en">
@@ -198,29 +194,18 @@ app.get('/img-proxy', (req, res) => {
         <input type="text" id="search" placeholder="Search..." oninput="handleSearch()">
     </header>
     <main>
-        <div class="content">
-            <div id="grid" class="grid"></div>
-        </div>
+        <div class="content"><div id="grid" class="grid"></div></div>
         <div class="sidebar">
             <div class="player-container">
                 <video id="video" controls autoplay></video>
-                <div style="padding:15px">
-                    <h3 id="playing-title">Select something to watch</h3>
-                    <div id="video-status" class="status"></div>
-                </div>
+                <div style="padding:15px"><h3 id="playing-title">Select something</h3><div id="video-status" class="status"></div></div>
             </div>
-            <div id="streams" class="stream-list" style="display:none">
-                <h4>Select Quality</h4>
-                <div id="stream-items"></div>
-            </div>
+            <div id="streams" class="stream-list" style="display:none"><h4>Select Quality</h4><div id="stream-items"></div></div>
         </div>
     </main>
     <script>
         const channels = ${channels};
-        let currentTab = 'live';
-        let hls = null;
-        let searchTimeout;
-
+        let currentTab = 'live', hls = null, searchTimeout;
         function setTab(tab) {
             currentTab = tab;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -228,7 +213,6 @@ app.get('/img-proxy', (req, res) => {
             document.getElementById('search').value = '';
             handleSearch();
         }
-
         async function handleSearch() {
             const query = document.getElementById('search').value.toLowerCase();
             const grid = document.getElementById('grid');
@@ -243,20 +227,16 @@ app.get('/img-proxy', (req, res) => {
                 }, 500);
             }
         }
-
         function renderGrid(items) {
-            const grid = document.getElementById('grid');
-            grid.innerHTML = items.map(item => {
+            document.getElementById('grid').innerHTML = items.map(item => {
                 const poster = item.poster || 'https://via.placeholder.com/150x225?text=No+Poster';
                 const proxiedPoster = poster.includes('thetvapp.to') ? \`/img-proxy?url=\${encodeURIComponent(poster)}\` : poster;
-                return \`
-                <button class="card" onclick="selectItem('\${item.id}', '\${item.type || currentTab}', '\${item.name.replace(/'/g, "\\\\'")}')">
+                return \`<button class="card" onclick="selectItem('\${item.id}', '\${item.type || currentTab}', '\${item.name.replace(/'/g, "\\\\'")}')">
                     <img src="\${proxiedPoster}" onerror="this.src='https://via.placeholder.com/150x225?text=No+Poster'">
                     <div class="card-info"><strong>\${item.name}</strong></div>
                 </button>\`;
             }).join('');
         }
-
         async function selectItem(id, type, name) {
             document.getElementById('playing-title').innerText = name;
             document.getElementById('streams').style.display = 'none';
@@ -264,45 +244,32 @@ app.get('/img-proxy', (req, res) => {
             if (type === 'tv' || currentTab === 'live') {
                 playStream(\`\${window.location.origin}/play/\${id}/index.m3u8\`);
             } else {
-                document.getElementById('stream-items').innerHTML = 'Searching streams...';
+                document.getElementById('stream-items').innerHTML = 'Searching...';
                 document.getElementById('streams').style.display = 'block';
                 const res = await fetch(\`/streams/\${type}/\${id}\`);
                 const streams = await res.json();
                 document.getElementById('stream-items').innerHTML = streams.map(s => \`
                     <div class="stream-item" onclick="playStream('\${s.infoHash ? window.location.origin + '/stream-torrent/' + s.infoHash : s.url}')">
                         \${s.title}
-                    </div>
-                \`).join('');
+                    </div>\`).join('');
             }
         }
-
         function playStream(url) {
-            const video = document.getElementById('video');
-            const status = document.getElementById('video-status');
-            status.innerText = url.includes('stream-torrent') ? 'Connecting to peers...' : 'Playing...';
-
+            const video = document.getElementById('video'), status = document.getElementById('video-status');
+            status.innerText = url.includes('stream-torrent') ? 'Connecting...' : 'Playing...';
             if (hls) { hls.destroy(); hls = null; }
-
             if (url.endsWith('.m3u8')) {
                 if (Hls.isSupported()) {
-                    hls = new Hls();
-                    hls.loadSource(url);
-                    hls.attachMedia(video);
+                    hls = new Hls(); hls.loadSource(url); hls.attachMedia(video);
                     hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
                 } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                    video.src = url;
-                    video.play();
+                    video.src = url; video.play();
                 }
-            } else {
-                video.src = url;
-                video.play().catch(e => { status.innerText = 'Playback error. Try another stream.'; });
-            }
+            } else { video.src = url; video.play().catch(e => { status.innerText = 'Playback error.'; }); }
         }
         handleSearch();
     </script>
 </body>
 </html>`);
 });
-
-app.listen(PORT, () => console.log(`TheTVApp v1.8.0 live on ${PORT}`));
-
+app.listen(PORT, () => console.log(\`TheTVApp v1.9.0 live on \${PORT}\`));
