@@ -108,7 +108,40 @@ function loadChannels() {
 }
 
 function getChannels() {
-  if (!cachedChannels.length) loadChannels();
+  if (!cachedChannels.length) 
+app.get('/api/youtube/search', async (req, res) => {
+  const q = req.query.q;
+  if (!q) return res.json([]);
+  
+  try {
+    const { execa } = await import('execa');
+    // Using yt-dlp to search as it is more reliable than scraping in some environments
+    const { stdout } = await execa('yt-dlp', [
+      'ytsearch10:' + q,
+      '--dump-json',
+      '--flat-playlist'
+    ]);
+    
+    const lines = stdout.trim().split('\n');
+    const results = lines.map(line => {
+      try {
+        const j = JSON.parse(line);
+        return {
+          id: j.id,
+          title: j.title,
+          thumbnail: j.thumbnails ? j.thumbnails[0].url : `https://i.ytimg.com/vi/${j.id}/hqdefault.jpg`,
+          author: j.uploader || 'YouTube'
+        };
+      } catch(e) { return null; }
+    }).filter(Boolean);
+    
+    res.json(results);
+  } catch (error) {
+    console.error('YouTube Search Error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+loadChannels();
   return cachedChannels;
 }
 
@@ -205,29 +238,47 @@ function renderWatchPage(req) {
   <meta name="apple-mobile-web-app-title" content="TheTVApp">
   <title>TheTVApp Web Player</title>
   <style>
-    :root { color-scheme: dark; --bg: #070b14; --panel: #101827; --panel2: #162033; --text: #f8fafc; --muted: #9ca3af; --accent: #22c55e; --border: #263246; }
+    :root { color-scheme: dark; --bg: #070b14; --panel: #101827; --panel2: #162033; --text: #f8fafc; --muted: #9ca3af; --accent: #22c55e; --border: #263246; --yt: #ff0000; }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: radial-gradient(circle at top, #16233b 0%, var(--bg) 48%, #03050a 100%); color: var(--text); min-height: 100vh; }
     header { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(18px); background: rgba(7, 11, 20, 0.88); border-bottom: 1px solid var(--border); padding: 14px 16px; }
     h1 { margin: 0 0 10px; font-size: 22px; line-height: 1.2; }
     .topline { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
     .status { color: var(--muted); font-size: 13px; }
-    .search { width: 100%; margin-top: 12px; padding: 13px 14px; border-radius: 14px; border: 1px solid var(--border); background: #0d1422; color: var(--text); font-size: 16px; outline: none; }
+    
+    .tabs { display: flex; gap: 8px; margin-top: 12px; }
+    .tab { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .tab.active { background: var(--panel2); color: var(--text); border-color: var(--accent); }
+    .tab.active.yt-tab { border-color: var(--yt); }
+
+    .search-container { margin-top: 12px; position: relative; }
+    .search { width: 100%; padding: 13px 14px; border-radius: 14px; border: 1px solid var(--border); background: #0d1422; color: var(--text); font-size: 16px; outline: none; }
+    
     main { display: grid; grid-template-columns: 390px minmax(0, 1fr); gap: 16px; padding: 16px; max-width: 1320px; margin: 0 auto; }
     .playerPanel, .listPanel { background: rgba(16, 24, 39, 0.92); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,.28); }
-    .playerPanel { position: sticky; top: 96px; align-self: start; }
-    video { width: 100%; min-height: 220px; background: #000; display: block; }
+    .playerPanel { position: sticky; top: 150px; align-self: start; }
+    
+    .video-wrapper { position: relative; width: 100%; padding-top: 56.25%; background: #000; }
+    video, iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+    
     .now { padding: 14px; }
     .now h2 { margin: 0 0 6px; font-size: 18px; }
     .now p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
     .openLink { display: inline-block; margin-top: 12px; padding: 11px 13px; border-radius: 12px; color: #052e16; background: var(--accent); font-weight: 700; text-decoration: none; }
+    
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; padding: 12px; }
-    .channel { appearance: none; border: 1px solid var(--border); background: linear-gradient(180deg, var(--panel2), #0d1422); color: var(--text); border-radius: 16px; padding: 12px; min-height: 102px; text-align: left; display: flex; flex-direction: column; gap: 8px; cursor: pointer; }
+    .channel, .yt-item { appearance: none; border: 1px solid var(--border); background: linear-gradient(180deg, var(--panel2), #0d1422); color: var(--text); border-radius: 16px; padding: 12px; min-height: 102px; text-align: left; display: flex; flex-direction: column; gap: 8px; cursor: pointer; }
     .channel:active, .channel.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(34,197,94,.22); }
-    .channel img { width: 54px; height: 36px; object-fit: contain; background: rgba(255,255,255,.05); border-radius: 8px; }
-    .channel strong { font-size: 14px; line-height: 1.25; }
-    .channel span { color: var(--muted); font-size: 12px; }
-    .empty { padding: 24px; color: var(--muted); }
+    .yt-item:active, .yt-item.active { border-color: var(--yt); box-shadow: 0 0 0 2px rgba(255,0,0,.22); }
+    
+    .channel img, .yt-item img { width: 54px; height: 36px; object-fit: contain; background: rgba(255,255,255,.05); border-radius: 8px; }
+    .yt-item img { width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover; }
+    
+    .channel strong, .yt-item strong { font-size: 14px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .channel span, .yt-item span { color: var(--muted); font-size: 12px; }
+    
+    .empty, .loading { padding: 24px; color: var(--muted); text-align: center; }
+    
     @media (max-width: 820px) {
       main { grid-template-columns: 1fr; padding: 10px; }
       .playerPanel { position: static; }
@@ -240,86 +291,170 @@ function renderWatchPage(req) {
   <header>
     <div class="topline">
       <h1>TheTVApp Web Player</h1>
-      <div class="status"><span id="count"></span> channels · Version ${escapeHtml(manifest.version)}</div>
+      <div class="status"><span id="count"></span> items · Version ${escapeHtml(manifest.version)}</div>
     </div>
-    <input id="search" class="search" type="search" placeholder="Search channels..." autocomplete="off">
+    <div class="tabs">
+      <div id="tab-tv" class="tab active" onclick="setTab('tv')">Live TV</div>
+      <div id="tab-yt" class="tab" onclick="setTab('yt')">YouTube</div>
+    </div>
+    <div class="search-container">
+      <input id="search" class="search" type="search" placeholder="Search channels..." autocomplete="off">
+    </div>
   </header>
   <main>
     <section class="playerPanel">
-      <video id="video" controls playsinline webkit-playsinline preload="none"></video>
+      <div class="video-wrapper">
+        <video id="video" controls playsinline webkit-playsinline style="display:block;"></video>
+        <iframe id="yt-player" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="display:none;"></iframe>
+      </div>
       <div class="now">
-        <h2 id="nowTitle">Pick a channel</h2>
-        <p id="nowText">Tap any channel below. On iPhone or iPad, if the embedded player does not start, use the green Open Stream button.</p>
+        <h2 id="nowTitle">Pick something</h2>
+        <p id="nowText">Tap any item below to start watching.</p>
         <a id="openLink" class="openLink" href="#" target="_blank" rel="noopener" style="display:none;">Open Stream</a>
       </div>
     </section>
     <section class="listPanel">
       <div id="grid" class="grid"></div>
-      <div id="empty" class="empty" style="display:none;">No channels found.</div>
+      <div id="loading" class="loading" style="display:none;">Searching YouTube...</div>
+      <div id="empty" class="empty" style="display:none;">Nothing found.</div>
     </section>
   </main>
   <script>
     const channels = ${channelData};
+    let currentTab = 'tv';
+    let ytResults = [];
+    let activeId = '';
+    
     const grid = document.getElementById('grid');
     const search = document.getElementById('search');
     const video = document.getElementById('video');
+    const ytPlayer = document.getElementById('yt-player');
     const nowTitle = document.getElementById('nowTitle');
     const nowText = document.getElementById('nowText');
     const openLink = document.getElementById('openLink');
     const count = document.getElementById('count');
     const empty = document.getElementById('empty');
-    let activeId = '';
+    const loading = document.getElementById('loading');
 
-    count.textContent = channels.length;
+    function setTab(tab) {
+      currentTab = tab;
+      document.getElementById('tab-tv').className = 'tab' + (tab === 'tv' ? ' active' : '');
+      document.getElementById('tab-yt').className = 'tab' + (tab === 'yt' ? ' active yt-tab' : '');
+      search.placeholder = tab === 'tv' ? 'Search channels...' : 'Search YouTube...';
+      search.value = '';
+      render();
+    }
 
-    function play(channel) {
+    function playTV(channel) {
       activeId = channel.id;
+      ytPlayer.style.display = 'none';
+      ytPlayer.src = '';
+      video.style.display = 'block';
       video.src = channel.playUrl;
       video.load();
-      const maybePromise = video.play();
-      if (maybePromise && typeof maybePromise.catch === 'function') {
-        maybePromise.catch(() => {});
-      }
+      video.play().catch(() => {});
+      
       nowTitle.textContent = channel.name;
-      nowText.textContent = 'If playback does not begin, tap Play in the video controls or use Open Stream.';
+      nowText.textContent = 'Live TV Stream';
       openLink.href = channel.playUrl;
       openLink.style.display = 'inline-block';
       render();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (window.innerWidth <= 820) window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function render() {
-      const q = search.value.trim().toLowerCase();
-      const visible = channels.filter((channel) => channel.name.toLowerCase().includes(q));
+    function playYT(item) {
+      activeId = item.id;
+      video.pause();
+      video.style.display = 'none';
+      video.src = '';
+      
+      ytPlayer.style.display = 'block';
+      ytPlayer.src = 'https://www.youtube.com/embed/' + item.id + '?autoplay=1';
+      
+      nowTitle.textContent = item.title;
+      nowText.textContent = 'YouTube Video by ' + item.author;
+      openLink.style.display = 'none';
+      render();
+      if (window.innerWidth <= 820) window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function searchYT(q) {
+      if (!q) {
+        ytResults = [];
+        render();
+        return;
+      }
+      loading.style.display = 'block';
       grid.innerHTML = '';
-      empty.style.display = visible.length ? 'none' : 'block';
+      try {
+        const res = await fetch('/api/youtube/search?q=' + encodeURIComponent(q));
+        ytResults = await res.json();
+      } catch (e) {
+        console.error(e);
+        ytResults = [];
+      }
+      loading.style.display = 'none';
+      render();
+    }
 
-      for (const channel of visible) {
-        const button = document.createElement('button');
-        button.className = 'channel' + (channel.id === activeId ? ' active' : '');
-        button.type = 'button';
-        button.onclick = () => play(channel);
+    let searchTimeout;
+    search.addEventListener('input', () => {
+      if (currentTab === 'tv') {
+        render();
+      } else {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => searchYT(search.value.trim()), 500);
+      }
+    });
 
-        const img = document.createElement('img');
-        img.loading = 'lazy';
-        img.alt = '';
-        img.src = channel.poster || '';
-        img.onerror = () => { img.style.display = 'none'; };
-
-        const name = document.createElement('strong');
-        name.textContent = channel.name;
-
-        const genre = document.createElement('span');
-        genre.textContent = (channel.genres && channel.genres[0]) || 'Live TV';
-
-        button.appendChild(img);
-        button.appendChild(name);
-        button.appendChild(genre);
-        grid.appendChild(button);
+    function render() {
+      grid.innerHTML = '';
+      const q = search.value.trim().toLowerCase();
+      
+      if (currentTab === 'tv') {
+        const visible = channels.filter(c => c.name.toLowerCase().includes(q));
+        count.textContent = visible.length;
+        empty.style.display = visible.length ? 'none' : 'block';
+        
+        visible.forEach(channel => {
+          const btn = document.createElement('button');
+          btn.className = 'channel' + (channel.id === activeId ? ' active' : '');
+          btn.onclick = () => playTV(channel);
+          
+          const img = document.createElement('img');
+          img.src = channel.poster;
+          img.onerror = () => img.style.display = 'none';
+          
+          const title = document.createElement('strong');
+          title.textContent = channel.name;
+          
+          btn.append(img, title);
+          grid.appendChild(btn);
+        });
+      } else {
+        count.textContent = ytResults.length;
+        empty.style.display = (ytResults.length || loading.style.display === 'block') ? 'none' : 'block';
+        
+        ytResults.forEach(item => {
+          const btn = document.createElement('button');
+          btn.className = 'yt-item' + (item.id === activeId ? ' active' : '');
+          btn.onclick = () => playYT(item);
+          
+          const img = document.createElement('img');
+          img.src = item.thumbnail;
+          
+          const title = document.createElement('strong');
+          title.textContent = item.title;
+          
+          const author = document.createElement('span');
+          author.textContent = item.author;
+          
+          btn.append(img, title, author);
+          grid.appendChild(btn);
+        });
       }
     }
 
-    search.addEventListener('input', render);
     render();
   </script>
 </body>
